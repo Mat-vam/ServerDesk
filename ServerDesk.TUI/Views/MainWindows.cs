@@ -1,4 +1,4 @@
-﻿
+﻿using ServerDesk.TUI.Styling;
 using System.Collections.ObjectModel;
 using ServerDesk.Core.Models;
 using ServerDesk.Core.Services;
@@ -8,6 +8,7 @@ using Terminal.Gui.Views;
 using Terminal.Gui;
 using ServerDesk.TUI.Components;
 using Terminal.Gui.Input;
+using ServerDesk.Core.Interfaces;
 
 namespace ServerDesk.TUI.Views;
 
@@ -15,6 +16,8 @@ public sealed class MainWindow : Window
 {
     private readonly IApplication _app;
     private readonly DeviceService _deviceService;
+    private readonly IScreenService _screenService;
+    private readonly Button _screensButton;
     private readonly List<Device> _devices;
 
     private readonly ListView _deviceList;
@@ -56,10 +59,11 @@ public sealed class MainWindow : Window
     );
 
 
-    public MainWindow(IApplication app, DeviceService deviceService, IEnumerable<Device> devices)
+    public MainWindow(IApplication app, DeviceService deviceService, IEnumerable<Device> devices, IScreenService screenService)
     {
         _app = app;
         _deviceService = deviceService;
+        _screenService = screenService;
         _devices = devices.ToList();
 
         Title = "ServerDesk | Device Manager";
@@ -270,7 +274,17 @@ public sealed class MainWindow : Window
             ShadowStyle = null
         };
 
-        _actionPanel.Add(_newButton, _saveButton, _deleteButton);
+        _screensButton = new Button
+        {
+            Text = "Sesje Screen",
+            X = Pos.Right(_deleteButton) + 2,
+            Y = 0,
+            ShadowStyle = null,
+            CanFocus = true,
+            TabStop = TabBehavior.TabStop
+        };
+
+        _actionPanel.Add(_newButton, _saveButton, _deleteButton, _screensButton);
 
         _newButton.CanFocus = true;
         _newButton.TabStop = TabBehavior.TabStop;
@@ -335,12 +349,22 @@ public sealed class MainWindow : Window
         };
 
         UpdateResponsiveLayout();
+
+        AppTheme.Apply(this);
+
+        _deleteButton.SetScheme(AppTheme.CreateWarning());
+        _counter.SetScheme(AppTheme.CreateAccent());
     }
 
     // Zdarzenia przyciskow akcji
 
     private void RegisterEvents()
     {
+        _screensButton.Accepted += async (_, _) =>
+        {
+            await OpenScreenManagerAsync();
+        };
+
         _deviceList.ValueChanged += async (_, _) =>
         {
             await HandleDeviceSelectionChangedAsync();
@@ -589,6 +613,72 @@ public sealed class MainWindow : Window
         }
     }
 
+
+    private async Task OpenScreenManagerAsync()
+{
+    if (_isBusy || _isNavigating)
+        return;
+
+    _isNavigating = true;
+
+    try
+    {
+        // Korzystamy z istniejacego pytania:
+        // Zapisz / Odrzuc / Anuluj.
+        bool canLeave = await ConfirmDiscardChangesAsync();
+
+        if (!canLeave)
+            return;
+
+        // Po zapisaniu nowego urzadzenia _editingId
+        // zostanie ustawione przez istniejacy kod.
+        if (_editingId is not Guid deviceId)
+        {
+            _status.Text =
+                "Najpierw wybierz lub zapisz urzadzenie.";
+            return;
+        }
+
+        int index = _devices.FindIndex(d => d.Id == deviceId);
+
+        if (index < 0)
+        {
+            _status.Text = "Nie znaleziono urzadzenia.";
+            return;
+        }
+
+        // Przywracamy zapisane dane formularza.
+        // Ma to znaczenie po wybraniu opcji Odrzuc.
+        SelectDeviceSilently(index);
+        ShowSelectedDevice();
+
+        Device device = _devices[index];
+
+        using (var screenWindow = new ScreenManagerWindow(
+            _app,
+            _screenService,
+            _deviceService,
+            device))
+        {
+            _app.Run(screenWindow);
+        }
+
+        // Screen Manager mogl zapisac nowe ustawienia SSH.
+        // Po powrocie pobieramy aktualne dane.
+        await ReloadDevicesAsync(deviceId);
+
+        _status.Text =
+            $"Powrot z sesji Screen: {device.Name}";
+    }
+    catch (Exception ex)
+    {
+        ShowError(ex.Message);
+    }
+    finally
+    {
+        _isNavigating = false;
+    }
+}
 
     // Funkcja do potwierdzania odrzucenia zmian
     private async Task<bool> ConfirmDiscardChangesAsync()

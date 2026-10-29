@@ -1,5 +1,4 @@
-﻿
-using ServerDesk.Core.Services;
+﻿using ServerDesk.Core.Services;
 using ServerDesk.Infrastructure.SSH;
 using ServerDesk.Infrastructure.Storage;
 using ServerDesk.TUI.Views;
@@ -16,37 +15,16 @@ string devicesFile = Path.Combine(
 
 var repository = new JsonDeviceRepository(devicesFile);
 var deviceService = new DeviceService(repository);
+var screenService = new SshScreenService();
 
 var devices = await deviceService.GetDevicesAsync();
 
 using IApplication app = Application.Create().Init();
 
-if (args.Contains("--screens"))
-{
-    if (devices.Count == 0)
-    {
-        Console.WriteLine(
-            "Brak urzadzen. Dodaj najpierw komputer.");
+using var window = new MainWindow(
+    app,
+    deviceService,
+    devices,
+    screenService);
 
-        return;
-    }
-
-    // Tymczasowo testujemy pierwsze zapisane urzadzenie.
-    // Pozniej bedziemy wybierac je w interfejsie.
-    var device = devices[0];
-
-    var screenService = new SshScreenService();
-
-    using var window = new ScreenManagerWindow(app, screenService, deviceService, device);
-
-    app.Run(window);
-}
-else
-{
-    using var window = new MainWindow(
-        app,
-        deviceService,
-        devices);
-
-    app.Run(window);
-}
+app.Run(window);
