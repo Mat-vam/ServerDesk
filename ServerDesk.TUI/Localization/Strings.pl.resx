@@ -1,0 +1,537 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Actions" xml:space="preserve">
+    <value>Akcje</value>
+  </data>
+  <data name="Back" xml:space="preserve">
+    <value>Wróć</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Anuluj</value>
+  </data>
+  <data name="ChangesSaved" xml:space="preserve">
+    <value>Zmiany zapisane pomyślnie.</value>
+  </data>
+  <data name="CheckingSshAccess" xml:space="preserve">
+    <value>Sprawdzanie dostępu SSH...</value>
+  </data>
+  <data name="CommandLabel" xml:space="preserve">
+    <value>Polecenie:</value>
+  </data>
+  <data name="CommandSentAndRefreshed" xml:space="preserve">
+    <value>Wysłano i odświeżono: {0:HH:mm:ss}</value>
+  </data>
+  <data name="CommandSentRefreshFailed" xml:space="preserve">
+    <value>Polecenie wysłano, ale nie odświeżono podglądu: {0}</value>
+  </data>
+  <data name="Confirmation" xml:space="preserve">
+    <value>Potwierdzenie</value>
+  </data>
+  <data name="Connect" xml:space="preserve">
+    <value>Połącz</value>
+  </data>
+  <data name="ConnectHint" xml:space="preserve">
+    <value>Uzupełnij dane i kliknij Połącz.</value>
+  </data>
+  <data name="ConnectionFailed" xml:space="preserve">
+    <value>Błąd połączenia: {0}</value>
+  </data>
+  <data name="ConnectionNotVerified" xml:space="preserve">
+    <value>Dane połączenia nie są zatwierdzone. Kliknij Połącz.</value>
+  </data>
+  <data name="ConnectionSettingsChanged" xml:space="preserve">
+    <value>Dane połączenia uległy zmianie. Połącz ponownie.</value>
+  </data>
+  <data name="ConnectToSave" xml:space="preserve">
+    <value>Kliknij Połącz, aby zapisać zmianę.</value>
+  </data>
+  <data name="ConsoleEmpty" xml:space="preserve">
+    <value>(Konsola jest pusta.)</value>
+  </data>
+  <data name="ConsoleOpenFailed" xml:space="preserve">
+    <value>Błąd otwierania konsoli: {0}</value>
+  </data>
+  <data name="ConsolePreview" xml:space="preserve">
+    <value>Podgląd konsoli</value>
+  </data>
+  <data name="ConsoleWindowTitle" xml:space="preserve">
+    <value>ServerDesk | {0} | {1} | okno 0</value>
+  </data>
+  <data name="ContinuePrompt" xml:space="preserve">
+    <value>Czy kontynuować?</value>
+  </data>
+  <data name="CreateSessionAction" xml:space="preserve">
+    <value>Utwórz</value>
+  </data>
+  <data name="CreatingSession" xml:space="preserve">
+    <value>Tworzenie sesji...</value>
+  </data>
+  <data name="CreationRefreshFailed" xml:space="preserve">
+    <value>Sesja utworzona, ale nie odświeżono listy: {0}</value>
+  </data>
+  <data name="CredentialStoreWindowsOnly" xml:space="preserve">
+    <value>Ten magazyn poświadczeń wymaga systemu Windows.</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Usuń</value>
+  </data>
+  <data name="DeleteDevicePrompt" xml:space="preserve">
+    <value>Czy usunąć urządzenie „{0}”?</value>
+  </data>
+  <data name="DeletingDevice" xml:space="preserve">
+    <value>Usuwanie urządzenia...</value>
+  </data>
+  <data name="DeviceAlreadyMissing" xml:space="preserve">
+    <value>Urządzenie już nie istnieje.</value>
+  </data>
+  <data name="DeviceCount" xml:space="preserve">
+    <value>Urządzenia: {0}</value>
+  </data>
+  <data name="DeviceDeleted" xml:space="preserve">
+    <value>Urządzenie usunięte.</value>
+  </data>
+  <data name="DeviceDetails" xml:space="preserve">
+    <value>Dane urządzenia</value>
+  </data>
+  <data name="DeviceHostRequired" xml:space="preserve">
+    <value>Adres urządzenia nie może być pusty.</value>
+  </data>
+  <data name="DeviceLabelFormat" xml:space="preserve">
+    <value>Urządzenie: {0}</value>
+  </data>
+  <data name="DeviceNameRequired" xml:space="preserve">
+    <value>Nazwa urządzenia nie może być pusta.</value>
+  </data>
+  <data name="DeviceNotFound" xml:space="preserve">
+    <value>Nie znaleziono urządzenia.</value>
+  </data>
+  <data name="DevicePortOutOfRange" xml:space="preserve">
+    <value>Port musi być w zakresie 1–65535.</value>
+  </data>
+  <data name="Devices" xml:space="preserve">
+    <value>Urządzenia</value>
+  </data>
+  <data name="DeviceUsernameRequired" xml:space="preserve">
+    <value>Nazwa użytkownika SSH nie może być pusta.</value>
+  </data>
+  <data name="Discard" xml:space="preserve">
+    <value>Odrzuć</value>
+  </data>
+  <data name="EditingDevice" xml:space="preserve">
+    <value>Edycja: {0}</value>
+  </data>
+  <data name="EnterSearchText" xml:space="preserve">
+    <value>Wpisz tekst do wyszukania.</value>
+  </data>
+  <data name="ErrorDetails" xml:space="preserve">
+    <value>Błąd: {0}</value>
+  </data>
+  <data name="ErrorTitle" xml:space="preserve">
+    <value>Błąd</value>
+  </data>
+  <data name="ErrorWithDetails" xml:space="preserve">
+    <value>{0} Szczegóły: {1}</value>
+  </data>
+  <data name="FindNext" xml:space="preserve">
+    <value>Znajdź następne</value>
+  </data>
+  <data name="ForgetPassphrase" xml:space="preserve">
+    <value>Zapomnij hasło</value>
+  </data>
+  <data name="GnuScreenSessions" xml:space="preserve">
+    <value>Sesje GNU Screen</value>
+  </data>
+  <data name="HostFingerprintLabel" xml:space="preserve">
+    <value>Zaufany odcisk hosta (SHA256):</value>
+  </data>
+  <data name="HostFingerprintRequired" xml:space="preserve">
+    <value>Podaj zaufany odcisk klucza hosta.</value>
+  </data>
+  <data name="HostLabel" xml:space="preserve">
+    <value>Adres IP / Host:</value>
+  </data>
+  <data name="HostLabelFormat" xml:space="preserve">
+    <value>Host: {0}:{1}</value>
+  </data>
+  <data name="InvalidCommand" xml:space="preserve">
+    <value>Polecenie musi mieć 1–512 znaków i nie może zawierać znaków sterujących.</value>
+  </data>
+  <data name="InvalidHostFingerprint" xml:space="preserve">
+    <value>Nieprawidłowy odcisk klucza hosta.</value>
+  </data>
+  <data name="InvalidLanguage" xml:space="preserve">
+    <value>Nieobsługiwany język aplikacji.</value>
+  </data>
+  <data name="InvalidSessionId" xml:space="preserve">
+    <value>Nieprawidłowy identyfikator sesji.</value>
+  </data>
+  <data name="InvalidSessionName" xml:space="preserve">
+    <value>Nazwa sesji musi mieć 1–32 znaki: litery, cyfry, podkreślenia lub myślniki.</value>
+  </data>
+  <data name="InvalidStoredCredential" xml:space="preserve">
+    <value>Zapisane poświadczenie jest nieprawidłowe.</value>
+  </data>
+  <data name="LanguageButton" xml:space="preserve">
+    <value>PL / EN</value>
+  </data>
+  <data name="LanguageEnglish" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="LanguagePolish" xml:space="preserve">
+    <value>Polski</value>
+  </data>
+  <data name="LanguagePrompt" xml:space="preserve">
+    <value>Wybierz język używany po ponownym uruchomieniu aplikacji.</value>
+  </data>
+  <data name="LanguageSavedRestart" xml:space="preserve">
+    <value>Zapisano język. Uruchom aplikację ponownie, aby go zastosować.</value>
+  </data>
+  <data name="LanguageTitle" xml:space="preserve">
+    <value>Język</value>
+  </data>
+  <data name="LoadingConsole" xml:space="preserve">
+    <value>Pobieranie konsoli...</value>
+  </data>
+  <data name="MainWindowTitle" xml:space="preserve">
+    <value>ServerDesk | Zarządzanie urządzeniami</value>
+  </data>
+  <data name="NameLabel" xml:space="preserve">
+    <value>Nazwa:</value>
+  </data>
+  <data name="New" xml:space="preserve">
+    <value>Nowe</value>
+  </data>
+  <data name="NewDevice" xml:space="preserve">
+    <value>Nowe urządzenie</value>
+  </data>
+  <data name="NewDeviceHint" xml:space="preserve">
+    <value>Nowe urządzenie — wypełnij formularz.</value>
+  </data>
+  <data name="NewSessionNameLabel" xml:space="preserve">
+    <value>Nazwa nowej sesji:</value>
+  </data>
+  <data name="NoActiveSessions" xml:space="preserve">
+    <value>Brak aktywnych sesji Screen.</value>
+  </data>
+  <data name="NoSearchResults" xml:space="preserve">
+    <value>Brak wyników dla: {0}</value>
+  </data>
+  <data name="NoSessionSelected" xml:space="preserve">
+    <value>Nie wybrano sesji.</value>
+  </data>
+  <data name="OK" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="OnlyMatchingDevice" xml:space="preserve">
+    <value>Jedyny pasujący wynik: {0}</value>
+  </data>
+  <data name="OpenConsoleAction" xml:space="preserve">
+    <value>Konsola</value>
+  </data>
+  <data name="PassphraseDeleteFailed" xml:space="preserve">
+    <value>Nie można usunąć hasła: {0}</value>
+  </data>
+  <data name="PassphraseForgotten" xml:space="preserve">
+    <value>Usunięto zapisane hasło. Uzupełnij dane i kliknij Połącz.</value>
+  </data>
+  <data name="PassphraseLabel" xml:space="preserve">
+    <value>Hasło klucza:</value>
+  </data>
+  <data name="PassphraseLoadFailed" xml:space="preserve">
+    <value>Nie można odczytać hasła: {0}</value>
+  </data>
+  <data name="PassphraseTooLong" xml:space="preserve">
+    <value>Hasło klucza jest zbyt długie dla magazynu poświadczeń.</value>
+  </data>
+  <data name="PortMustBeNumber" xml:space="preserve">
+    <value>Port musi być poprawną liczbą.</value>
+  </data>
+  <data name="PrivateKeyLabel" xml:space="preserve">
+    <value>Klucz prywatny:</value>
+  </data>
+  <data name="PrivateKeyPathRequired" xml:space="preserve">
+    <value>Podaj ścieżkę do klucza prywatnego.</value>
+  </data>
+  <data name="Ready" xml:space="preserve">
+    <value>Gotowe.</value>
+  </data>
+  <data name="Refresh" xml:space="preserve">
+    <value>Odśwież</value>
+  </data>
+  <data name="RefreshedAt" xml:space="preserve">
+    <value>Odświeżono: {0:HH:mm:ss}</value>
+  </data>
+  <data name="RefreshingSessions" xml:space="preserve">
+    <value>Odświeżanie listy sesji...</value>
+  </data>
+  <data name="RememberPassphraseOff" xml:space="preserve">
+    <value>Zapamiętuj: NIE</value>
+  </data>
+  <data name="RememberPassphraseOn" xml:space="preserve">
+    <value>Zapamiętuj: TAK</value>
+  </data>
+  <data name="ReturnedFromConsole" xml:space="preserve">
+    <value>Powrót z konsoli: {0}</value>
+  </data>
+  <data name="ReturnedFromSessions" xml:space="preserve">
+    <value>Powrót z sesji Screen: {0}</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Zapisz</value>
+  </data>
+  <data name="SavedPassphraseLoaded" xml:space="preserve">
+    <value>Hasło klucza wczytane. Kliknij Połącz.</value>
+  </data>
+  <data name="SavedPassphraseMissing" xml:space="preserve">
+    <value>Brak zapisanego hasła klucza. Wpisz je ponownie.</value>
+  </data>
+  <data name="SavingDevice" xml:space="preserve">
+    <value>Zapisywanie urządzenia...</value>
+  </data>
+  <data name="ScreenManagerTitle" xml:space="preserve">
+    <value>ServerDesk | Sesje Screen | {0}</value>
+  </data>
+  <data name="ScreenSessions" xml:space="preserve">
+    <value>Sesje Screen</value>
+  </data>
+  <data name="ScreenStateAttached" xml:space="preserve">
+    <value>Podłączona</value>
+  </data>
+  <data name="ScreenStateDetached" xml:space="preserve">
+    <value>Odłączona</value>
+  </data>
+  <data name="SearchLabel" xml:space="preserve">
+    <value>Szukaj:</value>
+  </data>
+  <data name="SelectDeviceFirst" xml:space="preserve">
+    <value>Najpierw wybierz urządzenie.</value>
+  </data>
+  <data name="SelectedDevice" xml:space="preserve">
+    <value>Wybrano: {0}</value>
+  </data>
+  <data name="SelectedDeviceMissing" xml:space="preserve">
+    <value>Wybrane urządzenie już nie istnieje.</value>
+  </data>
+  <data name="SelectedScreenSession" xml:space="preserve">
+    <value>Wybrano: {0} | {1}</value>
+  </data>
+  <data name="SelectOrSaveDevice" xml:space="preserve">
+    <value>Najpierw wybierz lub zapisz urządzenie.</value>
+  </data>
+  <data name="SelectSessionFirst" xml:space="preserve">
+    <value>Najpierw wybierz sesję.</value>
+  </data>
+  <data name="Send" xml:space="preserve">
+    <value>Wyślij</value>
+  </data>
+  <data name="SendingCommand" xml:space="preserve">
+    <value>Wysyłanie polecenia...</value>
+  </data>
+  <data name="SessionCreated" xml:space="preserve">
+    <value>Utworzono sesję: {0}</value>
+  </data>
+  <data name="SessionCreationFailed" xml:space="preserve">
+    <value>Nie można utworzyć sesji: {0}</value>
+  </data>
+  <data name="SessionLabel" xml:space="preserve">
+    <value>Sesja: {0}</value>
+  </data>
+  <data name="SessionList" xml:space="preserve">
+    <value>Lista sesji</value>
+  </data>
+  <data name="SessionManagement" xml:space="preserve">
+    <value>Zarządzanie sesjami</value>
+  </data>
+  <data name="SessionOperationFailed" xml:space="preserve">
+    <value>Błąd operacji: {0}. Odśwież listę, aby sprawdzić stan sesji.</value>
+  </data>
+  <data name="SessionsNotLoaded" xml:space="preserve">
+    <value>Nie pobrano jeszcze sesji.</value>
+  </data>
+  <data name="SessionsRefreshed" xml:space="preserve">
+    <value>Lista odświeżona | Sesje: {0}</value>
+  </data>
+  <data name="SessionsRefreshFailed" xml:space="preserve">
+    <value>Błąd odświeżania sesji: {0}</value>
+  </data>
+  <data name="SessionTerminated" xml:space="preserve">
+    <value>Sesja zakończona: {0}</value>
+  </data>
+  <data name="SshAccessVerified" xml:space="preserve">
+    <value>Dostęp SSH zweryfikowany | Sesje: {0}</value>
+  </data>
+  <data name="SshCommandSendFailed" xml:space="preserve">
+    <value>Nie można wysłać polecenia.</value>
+  </data>
+  <data name="SshConsoleReadFailed" xml:space="preserve">
+    <value>Nie można pobrać podglądu konsoli.</value>
+  </data>
+  <data name="SshHardcopyMissing" xml:space="preserve">
+    <value>Screen nie utworzył pliku podglądu konsoli.</value>
+  </data>
+  <data name="SshPortLabel" xml:space="preserve">
+    <value>Port SSH:</value>
+  </data>
+  <data name="SshSessionCreationFailed" xml:space="preserve">
+    <value>Nie można utworzyć sesji Screen.</value>
+  </data>
+  <data name="SshSessionListFailed" xml:space="preserve">
+    <value>Nie można pobrać sesji Screen.</value>
+  </data>
+  <data name="SshSessionTerminationFailed" xml:space="preserve">
+    <value>Nie można zakończyć sesji Screen.</value>
+  </data>
+  <data name="SshSettings" xml:space="preserve">
+    <value>Ustawienia SSH</value>
+  </data>
+  <data name="SshUserLabel" xml:space="preserve">
+    <value>Użytkownik SSH:</value>
+  </data>
+  <data name="TerminateSessionAction" xml:space="preserve">
+    <value>Zakończ</value>
+  </data>
+  <data name="TerminateSessionConfirm" xml:space="preserve">
+    <value>Zakończ sesję</value>
+  </data>
+  <data name="TerminateSessionTitle" xml:space="preserve">
+    <value>Zakończenie sesji</value>
+  </data>
+  <data name="TerminateSessionWarning" xml:space="preserve">
+    <value>Spowoduje to zamknięcie wszystkich okien sesji i może przerwać działające programy.</value>
+  </data>
+  <data name="TerminatingSession" xml:space="preserve">
+    <value>Kończenie sesji: {0}</value>
+  </data>
+  <data name="TerminationPending" xml:space="preserve">
+    <value>Wysłano żądanie zakończenia. Odśwież listę za chwilę.</value>
+  </data>
+  <data name="TerminationRefreshFailed" xml:space="preserve">
+    <value>Wysłano żądanie zakończenia, ale nie odświeżono listy: {0}</value>
+  </data>
+  <data name="UnsavedChangesPrompt" xml:space="preserve">
+    <value>Masz niezapisane zmiany. Co chcesz zrobić?</value>
+  </data>
+  <data name="UnsavedChangesTitle" xml:space="preserve">
+    <value>Niezapisane zmiany</value>
+  </data>
+  <data name="WaitForOperation" xml:space="preserve">
+    <value>Poczekaj na zakończenie operacji.</value>
+  </data>
+</root>

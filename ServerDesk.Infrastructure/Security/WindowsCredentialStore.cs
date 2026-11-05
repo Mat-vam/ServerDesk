@@ -1,11 +1,11 @@
-﻿
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Text;
+using ServerDesk.Core.Interfaces;
+using ServerDesk.Core.Errors;
 
 namespace ServerDesk.Infrastructure.Security;
-
-public sealed class WindowsCredentialStore
+public sealed class WindowsCredentialStore : ICredentialStore
 {
     private const uint GenericCredential = 1;
     private const uint PersistLocalMachine = 2;
@@ -21,8 +21,7 @@ public sealed class WindowsCredentialStore
         byte[] bytes = Encoding.Unicode.GetBytes(passphrase);
 
         if (bytes.Length > 2560)
-            throw new ArgumentException(
-                "Passphrase jest zbyt dlugie.");
+            throw new AppException(AppErrorCode.PassphraseTooLong);
 
         IntPtr blob = IntPtr.Zero;
 
@@ -88,13 +87,8 @@ public sealed class WindowsCredentialStore
             if (credential.CredentialBlobSize == 0)
                 return string.Empty;
 
-            if (credential.CredentialBlobSize > 2560 ||
-                credential.CredentialBlobSize % 2 != 0 ||
-                credential.CredentialBlob == IntPtr.Zero)
-            {
-                throw new InvalidOperationException(
-                    "Nieprawidlowe zapisane poswiadczenie.");
-            }
+            if (credential.CredentialBlobSize > 2560 || credential.CredentialBlobSize % 2 != 0 || credential.CredentialBlob == IntPtr.Zero)
+                throw new AppException(AppErrorCode.InvalidStoredCredential);
 
             int characters =
                 checked((int)credential.CredentialBlobSize / 2);
@@ -130,8 +124,7 @@ public sealed class WindowsCredentialStore
     private static void EnsureWindows()
     {
         if (!OperatingSystem.IsWindows())
-            throw new PlatformNotSupportedException(
-                "Ten magazyn hasel wymaga Windows.");
+            throw new AppException(AppErrorCode.CredentialStoreWindowsOnly);
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]

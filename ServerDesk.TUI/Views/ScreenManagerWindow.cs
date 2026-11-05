@@ -6,15 +6,15 @@ using Terminal.Gui.App;
 using Terminal.Gui.ViewBase;
 using Terminal.Gui.Views;
 using ServerDesk.Core.Services;
-using ServerDesk.Infrastructure.Security;
+using ServerDesk.TUI.Localization;
 
 namespace ServerDesk.TUI.Views;
 
 public sealed class ScreenManagerWindow : Window
 {
     private readonly IApplication _app;
-    private readonly IScreenService _screenService;
-    private readonly DeviceService _deviceService;
+    private readonly ScreenConsoleService _consoleService;
+    private readonly ScreenConnectionService _connectionService;
     private readonly Device _device;
 
     private readonly TextField _keyPathField;
@@ -26,9 +26,6 @@ public sealed class ScreenManagerWindow : Window
     private readonly Button _connectButton;
     private readonly Button _refreshButton;
 
-    private sealed record ConnectionData(string KeyPath, string Passphrase, string Fingerprint, bool RememberPassphrase);
-
-    private ConnectionData? _verifiedConnection;
 
     private readonly TextField _sessionNameField;
     private readonly Button _createButton;
@@ -43,8 +40,6 @@ public sealed class ScreenManagerWindow : Window
     private readonly FrameView _sessionsArea;
     private readonly Button _settingsButton;
 
-    private readonly WindowsCredentialStore _credentialStore = new();
-
     private bool _rememberPassphrase;
 
     private readonly Button _rememberButton;
@@ -53,26 +48,26 @@ public sealed class ScreenManagerWindow : Window
     private bool _isBusy;
     private bool _isClosing;
     public ScreenManagerWindow(
-    IApplication app,
-    IScreenService screenService,
-    DeviceService deviceService,
-    Device device)
+        IApplication app,
+        ScreenManagerService screenService,
+        SshSettingsService sshSettingsService,
+        Device device,
+        ScreenConsoleService consoleService)
     {
         _app = app;
-        _screenService = screenService;
-        _deviceService = deviceService;
+        _consoleService = consoleService;
+        _connectionService = screenService.CreateConnectionService(device, sshSettingsService);
         _device = device;
 
-        var savedSettings = device.SshSettings
-            ?? new SshConnectionSettings();
+        var savedSettings = _connectionService.GetInitialSettings();
 
         _rememberPassphrase = savedSettings.RememberPassphrase;
 
-        Title = $"ServerDesk | Sesje Screen | {device.Name}";
+        Title = UiText.Format("ScreenManagerTitle", device.Name);
 
         _settingsButton = new Button
         {
-            Text = "Lista sesji",
+            Text = UiText.Get("SessionList"),
             X = 1,
             Y = 0,
             ShadowStyle = null
@@ -80,7 +75,7 @@ public sealed class ScreenManagerWindow : Window
 
         var backButton = new Button
         {
-            Text = "Wroc",
+            Text = UiText.Get("Back"),
             X = Pos.AnchorEnd(12),
             Y = 0,
             Width = 12,
@@ -99,7 +94,7 @@ public sealed class ScreenManagerWindow : Window
         // W danym momencie widoczny jest tylko jeden.
         _connectionPanel = new FrameView
         {
-            Title = "Ustawienia SSH",
+            Title = UiText.Get("SshSettings"),
             X = 0,
             Y = 2,
             Width = Dim.Fill(),
@@ -109,7 +104,7 @@ public sealed class ScreenManagerWindow : Window
 
         _sessionsArea = new FrameView
         {
-            Title = "Zarzadzanie sesjami",
+            Title = UiText.Get("SessionManagement"),
             X = 0,
             Y = 2,
             Width = Dim.Fill(),
@@ -118,15 +113,9 @@ public sealed class ScreenManagerWindow : Window
             Visible = false
         };
 
-        string defaultKeyPath = Path.Combine(
-            Environment.GetFolderPath(
-                Environment.SpecialFolder.UserProfile),
-            ".ssh",
-            "serverdesk_ed25519");
-
         var keyPathLabel = new Label
         {
-            Text = "Klucz prywatny:",
+            Text = UiText.Get("PrivateKeyLabel"),
             X = 1,
             Y = 0
         };
@@ -136,14 +125,12 @@ public sealed class ScreenManagerWindow : Window
             X = 1,
             Y = 1,
             Width = Dim.Fill(2),
-            Text = string.IsNullOrWhiteSpace(savedSettings.PrivateKeyPath)
-                ? defaultKeyPath
-                : savedSettings.PrivateKeyPath
+            Text = savedSettings.PrivateKeyPath
         };
 
         var passphraseLabel = new Label
         {
-            Text = "Passphrase:",
+            Text = UiText.Get("PassphraseLabel"),
             X = 1,
             Y = 2
         };
@@ -159,8 +146,8 @@ public sealed class ScreenManagerWindow : Window
         _rememberButton = new Button
         {
             Text = _rememberPassphrase
-                ? "Zapamietywanie: TAK"
-                : "Zapamietywanie: NIE",
+                ? UiText.Get("RememberPassphraseOn")
+                : UiText.Get("RememberPassphraseOff"),
             X = 1,
             Y = 4,
             ShadowStyle = null
@@ -168,7 +155,7 @@ public sealed class ScreenManagerWindow : Window
 
         _forgetPassphraseButton = new Button
         {
-            Text = "Zapomnij haslo",
+            Text = UiText.Get("ForgetPassphrase"),
             X = Pos.Right(_rememberButton) + 2,
             Y = 4,
             ShadowStyle = null
@@ -176,7 +163,7 @@ public sealed class ScreenManagerWindow : Window
 
         var fingerprintLabel = new Label
         {
-            Text = "Zaufany odcisk hosta SHA256:",
+            Text = UiText.Get("HostFingerprintLabel"),
             X = 1,
             Y = 5
         };
@@ -191,7 +178,7 @@ public sealed class ScreenManagerWindow : Window
 
         _connectButton = new Button
         {
-            Text = "Polacz",
+            Text = UiText.Get("Connect"),
             X = 1,
             Y = 8,
             ShadowStyle = null
@@ -210,7 +197,7 @@ public sealed class ScreenManagerWindow : Window
 
         var sessionNameLabel = new Label
         {
-            Text = "Nazwa nowej sesji:",
+            Text = UiText.Get("NewSessionNameLabel"),
             X = 1,
             Y = 0
         };
@@ -225,7 +212,7 @@ public sealed class ScreenManagerWindow : Window
 
         _refreshButton = new Button
         {
-            Text = "Odswiez",
+            Text = UiText.Get("Refresh"),
             X = 1,
             Y = 3,
             ShadowStyle = null,
@@ -234,8 +221,17 @@ public sealed class ScreenManagerWindow : Window
 
         _createButton = new Button
         {
-            Text = "Utworz sesje",
-            X = Pos.Right(_refreshButton) + 2,
+            Text = UiText.Get("CreateSessionAction"),
+            X = Pos.Right(_refreshButton) + 1,
+            Y = 3,
+            ShadowStyle = null,
+            Enabled = false
+        };
+
+        _terminateButton = new Button
+        {
+            Text = UiText.Get("TerminateSessionAction"),
+            X = Pos.Right(_createButton) + 1,
             Y = 3,
             ShadowStyle = null,
             Enabled = false
@@ -243,27 +239,18 @@ public sealed class ScreenManagerWindow : Window
 
         _previewButton = new Button
         {
-            Text = "Otworz konsole",
-            X = 1,
-            Y = 4,
-            ShadowStyle = null,
-            Enabled = false
-        };
-
-        _terminateButton = new Button
-        {
-            Text = "Zakoncz sesje",
-            X = Pos.Right(_previewButton) + 2,
-            Y = 4,
+            Text = UiText.Get("OpenConsoleAction"),
+            X = Pos.Right(_terminateButton) + 1,
+            Y = 3,
             ShadowStyle = null,
             Enabled = false
         };
 
         var sessionsPanel = new FrameView
         {
-            Title = "Sesje GNU Screen",
+            Title = UiText.Get("GnuScreenSessions"),
             X = 0,
-            Y = 6,
+            Y = 5,
             Width = Dim.Fill(),
             Height = Dim.Fill(),
             ShadowStyle = null
@@ -284,8 +271,8 @@ public sealed class ScreenManagerWindow : Window
             _sessionNameField,
             _refreshButton,
             _createButton,
-            _previewButton,
             _terminateButton,
+            _previewButton,
             sessionsPanel);
 
         _selectedSessionLabel = new Label
@@ -293,7 +280,7 @@ public sealed class ScreenManagerWindow : Window
             X = 1,
             Y = Pos.AnchorEnd(2),
             Width = Dim.Fill(1),
-            Text = "Nie wybrano sesji."
+            Text = UiText.Get("NoSessionSelected")
         };
 
         _status = new Label
@@ -301,7 +288,7 @@ public sealed class ScreenManagerWindow : Window
             X = 1,
             Y = Pos.AnchorEnd(1),
             Width = Dim.Fill(1),
-            Text = "Uzupelnij dane i kliknij Polacz."
+            Text = UiText.Get("ConnectHint")
         };
 
         Add(
@@ -314,8 +301,7 @@ public sealed class ScreenManagerWindow : Window
             _status);
 
         _sessionList.SetSource(
-            new ObservableCollection<string>(
-                ["Nie pobrano jeszcze sesji."]));
+            new ObservableCollection<string>([UiText.Get("SessionsNotLoaded")]));
 
         _settingsButton.Accepted += (_, _) =>
         {
@@ -339,7 +325,7 @@ public sealed class ScreenManagerWindow : Window
         {
             if (_isBusy)
             {
-                _status.Text = "Poczekaj na zakonczenie operacji.";
+                _status.Text = UiText.Get("WaitForOperation");
                 return;
             }
 
@@ -379,10 +365,10 @@ public sealed class ScreenManagerWindow : Window
             _rememberPassphrase = !_rememberPassphrase;
 
             _rememberButton.Text = _rememberPassphrase
-                ? "Zapamietywanie: TAK"
-                : "Zapamietywanie: NIE";
+                ? UiText.Get("RememberPassphraseOn")
+                : UiText.Get("RememberPassphraseOff");
 
-            _status.Text = "Kliknij Polacz, aby zapisac zmiane.";
+            _status.Text = UiText.Get("ConnectToSave");
         };
 
         _forgetPassphraseButton.Accepted += (_, _) =>
@@ -400,24 +386,21 @@ public sealed class ScreenManagerWindow : Window
             try
             {
                 string? savedPassphrase =
-                    _credentialStore.Load(_device.Id);
+                    _connectionService.LoadSavedPassphrase();
 
                 if (savedPassphrase is not null)
                 {
                     _passphraseField.Text = savedPassphrase;
-                    _status.Text =
-                        "Passphrase wczytane. Kliknij Polacz.";
+                    _status.Text = UiText.Get("SavedPassphraseLoaded");
                 }
                 else
                 {
-                    _status.Text =
-                        "Brak zapisanego passphrase. Wpisz je ponownie.";
+                    _status.Text = UiText.Get("SavedPassphraseMissing");
                 }
             }
             catch (Exception ex)
             {
-                _status.Text =
-                    $"Nie mozna odczytac hasla: {ex.Message}";
+                _status.Text = UiText.Format("PassphraseLoadFailed", ErrorText.Get(ex));
             }
         }
 
@@ -433,24 +416,19 @@ public sealed class ScreenManagerWindow : Window
         _terminateButton.SetScheme(AppTheme.CreateWarning());
         _selectedSessionLabel.SetScheme(AppTheme.CreateAccent());
     }
-    private ConnectionData ReadConnectionData()
+    private ScreenConnectionData ReadConnectionData()
     {
-        return new ConnectionData(
-            _keyPathField.Text.Trim(),
+        return new ScreenConnectionData(
+            _keyPathField.Text,
             _passphraseField.Text,
-            _fingerprintField.Text.Trim(),
+            _fingerprintField.Text,
             _rememberPassphrase);
     }
 
     private bool EnsureConnectionReady()
     {
-        if (_verifiedConnection is not null &&
-            _verifiedConnection == ReadConnectionData())
-        {
+        if (_connectionService.IsReady(ReadConnectionData()))
             return true;
-        }
-
-        _verifiedConnection = null;
 
         _refreshButton.Enabled = false;
         _createButton.Enabled = false;
@@ -459,8 +437,7 @@ public sealed class ScreenManagerWindow : Window
 
         UpdateSessionList(Array.Empty<ScreenSession>());
 
-        _status.Text =
-            "Dane polaczenia nie zostaly zatwierdzone. Kliknij Polacz.";
+        _status.Text = UiText.Get("ConnectionNotVerified");
 
         return false;
     }
@@ -471,8 +448,8 @@ public sealed class ScreenManagerWindow : Window
         _sessionsArea.Visible = !showSettings;
 
         _settingsButton.Text = showSettings
-            ? "Lista sesji"
-            : "Ustawienia SSH";
+            ? UiText.Get("SessionList")
+            : UiText.Get("SshSettings");
 
         if (showSettings)
             _keyPathField.SetFocus();
@@ -491,28 +468,7 @@ public sealed class ScreenManagerWindow : Window
 
         try
         {
-            _credentialStore.Delete(_device.Id);
-
-            var previous = _device.SshSettings
-                ?? new SshConnectionSettings();
-
-            var settings = new SshConnectionSettings
-            {
-                PrivateKeyPath = previous.PrivateKeyPath,
-                HostFingerprint = previous.HostFingerprint,
-                RememberPassphrase = false,
-                AutoConnect = previous.AutoConnect
-            };
-
-            bool saved = await _deviceService.UpdateSshSettingsAsync(
-                _device.Id,
-                settings);
-
-            if (!saved)
-                throw new InvalidOperationException(
-                    "Nie znaleziono urzadzenia.");
-
-            _device.SshSettings = settings;
+            await _connectionService.ForgetPassphraseAsync();
 
             _app.Invoke(() =>
             {
@@ -520,10 +476,9 @@ public sealed class ScreenManagerWindow : Window
                     return;
 
                 _rememberPassphrase = false;
-                _rememberButton.Text = "Zapamietywanie: NIE";
+                _rememberButton.Text = UiText.Get("RememberPassphraseOff");
                 _passphraseField.Text = "";
 
-                _verifiedConnection = null;
                 _refreshButton.Enabled = false;
                 _createButton.Enabled = false;
                 _previewButton.Enabled = false;
@@ -531,8 +486,7 @@ public sealed class ScreenManagerWindow : Window
 
                 UpdateSessionList(Array.Empty<ScreenSession>());
 
-                _status.Text =
-                    "Zapomniano passphrase. Uzupelnij dane i kliknij Polacz.";
+                _status.Text = UiText.Get("PassphraseForgotten");
             });
         }
         catch (Exception ex)
@@ -540,8 +494,7 @@ public sealed class ScreenManagerWindow : Window
             _app.Invoke(() =>
             {
                 if (!_isClosing)
-                    _status.Text =
-                        $"Blad usuwania hasla: {ex.Message}";
+                    _status.Text = UiText.Format("PassphraseDeleteFailed", ErrorText.Get(ex));
             });
         }
         finally
@@ -565,14 +518,16 @@ public sealed class ScreenManagerWindow : Window
             index < 0 ||
             index >= _sessions.Count)
         {
-            _selectedSessionLabel.Text = "Nie wybrano sesji.";
+            _selectedSessionLabel.Text = UiText.Get("NoSessionSelected");
             return;
         }
 
         var session = _sessions[index];
 
-        _selectedSessionLabel.Text =
-            $"Wybrano: {session.Id} | {session.State}";
+        _selectedSessionLabel.Text = UiText.Format(
+            "SelectedScreenSession",
+            session.Id,
+            ScreenStateText.Get(session.State));
     }
 
     private void UpdateSessionList(
@@ -591,9 +546,10 @@ public sealed class ScreenManagerWindow : Window
 
         var names = _sessions.Count == 0
             ? new ObservableCollection<string>(
-                ["Brak aktywnych sesji screen."])
+                [UiText.Get("NoActiveSessions")])
             : new ObservableCollection<string>(
-                _sessions.Select(s => $"{s.Id} | {s.State}"));
+                _sessions.Select(s =>
+                    $"{s.Id} | {ScreenStateText.Get(s.State)}"));
 
         _sessionList.SetSource(names);
 
@@ -620,32 +576,10 @@ public sealed class ScreenManagerWindow : Window
         if (!connect && !EnsureConnectionReady())
             return;
 
-        ConnectionData connection = ReadConnectionData();
+        ScreenConnectionData connection = ReadConnectionData();
 
         if (connect)
-        {
-            // Nowa proba wymaga ponownego zatwierdzenia danych.
-            _verifiedConnection = null;
-
-            _refreshButton.Enabled = false;
-            _createButton.Enabled = false;
-            _previewButton.Enabled = false;
-            _terminateButton.Enabled = false;
-
             UpdateSessionList(Array.Empty<ScreenSession>());
-        }
-
-        if (!File.Exists(connection.KeyPath))
-        {
-            _status.Text = "Nie znaleziono klucza prywatnego.";
-            return;
-        }
-
-        if (string.IsNullOrWhiteSpace(connection.Fingerprint))
-        {
-            _status.Text = "Podaj odcisk SHA256 hosta.";
-            return;
-        }
 
         _isBusy = true;
 
@@ -662,34 +596,20 @@ public sealed class ScreenManagerWindow : Window
         _forgetPassphraseButton.Enabled = false;
 
         _status.Text = connect
-            ? "Sprawdzanie dostepu SSH..."
-            : "Odswiezanie listy sesji...";
+            ? UiText.Get("CheckingSshAccess")
+            : UiText.Get("RefreshingSessions");
 
         try
         {
-            var sessions = await Task.Run(
-                () => _screenService.GetSessionsAsync(
-                    _device,
-                    connection.KeyPath,
-                    connection.Passphrase,
-                    connection.Fingerprint));
-
-            // Ustawienia zapisujemy tylko po kliknieciu Polacz.
-            if (connect)
-            {
-                await SaveConnectionSettingsAsync(
-                    connection.KeyPath,
-                    connection.Fingerprint,
-                    connection.Passphrase);
-            }
+            var sessions = await Task.Run(() =>
+                connect
+                    ? _connectionService.ConnectAsync(connection)
+                    : _connectionService.RefreshAsync(connection));
 
             _app.Invoke(() =>
             {
                 if (_isClosing)
                     return;
-
-                if (connect)
-                    _verifiedConnection = connection;
 
                 UpdateSessionList(sessions);
 
@@ -697,8 +617,8 @@ public sealed class ScreenManagerWindow : Window
                     ShowConnectionSettings(false);
 
                 _status.Text = connect
-                    ? $"Dostep SSH zweryfikowany | Sesje: {sessions.Count}"
-                    : $"Lista odswiezona | Sesje: {sessions.Count}";
+                    ? UiText.Format("SshAccessVerified", sessions.Count)
+                    : UiText.Format("SessionsRefreshed", sessions.Count);
             });
         }
         catch (Exception ex)
@@ -708,11 +628,9 @@ public sealed class ScreenManagerWindow : Window
                 if (_isClosing)
                     return;
 
-                // Blad odswiezania nie zmienia zatwierdzonych danych.
-                // Mozna ponowic odswiezenie.
                 _status.Text = connect
-                    ? $"Blad polaczenia: {ex.Message}"
-                    : $"Blad odswiezania: {ex.Message}";
+                    ? UiText.Format("ConnectionFailed", ErrorText.Get(ex))
+                    : UiText.Format("SessionsRefreshFailed", ErrorText.Get(ex));
             });
         }
         finally
@@ -724,7 +642,8 @@ public sealed class ScreenManagerWindow : Window
                 if (_isClosing)
                     return;
 
-                bool verified = _verifiedConnection is not null;
+                bool verified =
+                    _connectionService.IsReady(ReadConnectionData());
 
                 _connectButton.Enabled = true;
                 _refreshButton.Enabled = verified;
@@ -740,6 +659,7 @@ public sealed class ScreenManagerWindow : Window
             });
         }
     }
+
     private void OpenSelectedConsole()
     {
         if (_isBusy || _isClosing)
@@ -752,26 +672,14 @@ public sealed class ScreenManagerWindow : Window
             index < 0 ||
             index >= _sessions.Count)
         {
-            _status.Text = "Najpierw wybierz sesje.";
+            _status.Text = UiText.Get("SelectSessionFirst");
             return;
         }
 
-        string keyPath = _keyPathField.Text.Trim();
-        string passphrase = _passphraseField.Text;
-        string fingerprint = _fingerprintField.Text.Trim();
+        var connection =
+            _connectionService.GetVerifiedConnection(ReadConnectionData());
+
         string sessionId = _sessions[index].Id;
-
-        if (!File.Exists(keyPath))
-        {
-            _status.Text = "Nie znaleziono klucza SSH.";
-            return;
-        }
-
-        if (string.IsNullOrWhiteSpace(fingerprint))
-        {
-            _status.Text = "Podaj odcisk SHA256 hosta.";
-            return;
-        }
 
         _isBusy = true;
 
@@ -779,20 +687,20 @@ public sealed class ScreenManagerWindow : Window
         {
             using var consoleWindow = new ScreenConsoleWindow(
                 _app,
-                _screenService,
+                _consoleService,
                 _device,
                 sessionId,
-                keyPath,
-                passphrase,
-                fingerprint);
+                connection.KeyPath,
+                connection.Passphrase,
+                connection.Fingerprint);
 
             _app.Run(consoleWindow);
 
-            _status.Text = $"Powrot z konsoli: {sessionId}";
+            _status.Text = UiText.Format("ReturnedFromConsole", sessionId);
         }
         catch (Exception ex)
         {
-            _status.Text = $"Blad otwierania konsoli: {ex.Message}";
+            _status.Text = UiText.Format("ConsoleOpenFailed", ErrorText.Get(ex));
         }
         finally
         {
@@ -812,16 +720,14 @@ public sealed class ScreenManagerWindow : Window
             index < 0 ||
             index >= _sessions.Count)
         {
-            _status.Text = "Najpierw wybierz sesje.";
+            _status.Text = UiText.Get("SelectSessionFirst");
             return;
         }
 
         // Zapamietujemy dokladnie te sesje i dane,
         // dla ktorych wyswietlimy potwierdzenie.
         string sessionId = _sessions[index].Id;
-        ConnectionData connection = ReadConnectionData();
-
-        bool terminationRequested = false;
+        ScreenConnectionData connection = ReadConnectionData();
 
         _isBusy = true;
 
@@ -829,15 +735,18 @@ public sealed class ScreenManagerWindow : Window
         {
             int? answer = MessageBox.Query(
                 _app,
-                "Zakonczenie sesji",
-                $"Urzadzenie: {_device.Name}\n" +
-                $"Host: {_device.Host}:{_device.Port}\n" +
-                $"Sesja: {sessionId}\n\n" +
-                "Zakonczenie sesji zamknie wszystkie jej okna " +
-                "i moze przerwac uruchomione programy.\n\n" +
-                "Czy kontynuowac?",
-                "Anuluj",
-                "Zakoncz sesje");
+                UiText.Get("TerminateSessionTitle"),
+                string.Join(
+                    Environment.NewLine,
+                    UiText.Format("DeviceLabelFormat", _device.Name),
+                    UiText.Format("HostLabelFormat", _device.Host, _device.Port),
+                    UiText.Format("SessionLabel", sessionId),
+                    "",
+                    UiText.Get("TerminateSessionWarning"),
+                    "",
+                    UiText.Get("ContinuePrompt")),
+                UiText.Get("Cancel"),
+                UiText.Get("TerminateSessionConfirm"));
 
             if (answer != 1)
                 return;
@@ -854,38 +763,35 @@ public sealed class ScreenManagerWindow : Window
             _rememberButton.Enabled = false;
             _forgetPassphraseButton.Enabled = false;
 
-            _status.Text = $"Konczenie sesji: {sessionId}";
+            _status.Text = UiText.Format("TerminatingSession", sessionId);
 
-            var sessions = await Task.Run(async () =>
-            {
-                await _screenService.TerminateSessionAsync(
-                    _device,
-                    connection.KeyPath,
-                    connection.Passphrase,
-                    connection.Fingerprint,
-                    sessionId);
-
-                terminationRequested = true;
-
-                return await _screenService.GetSessionsAsync(
-                    _device,
-                    connection.KeyPath,
-                    connection.Passphrase,
-                    connection.Fingerprint);
-            });
+            var result = await Task.Run(
+                () => _connectionService.TerminateSessionAsync(
+                    connection,
+                    sessionId));
 
             _app.Invoke(() =>
             {
                 if (_isClosing)
                     return;
 
-                UpdateSessionList(sessions);
+                if (result.Sessions is not null)
+                    UpdateSessionList(result.Sessions);
+                else
+                    UpdateSessionList(Array.Empty<ScreenSession>());
 
-                bool stillListed = sessions.Any(s => s.Id == sessionId);
-
-                _status.Text = stillListed
-                    ? "Wyslano zadanie zakonczenia. Odswiez liste za chwile."
-                    : $"Sesja zakonczona: {sessionId}";
+                if (result.RefreshError is not null)
+                {
+                    _status.Text = UiText.Format(
+                        "TerminationRefreshFailed",
+                        ErrorText.Get(result.RefreshError));
+                }
+                else
+                {
+                    _status.Text = result.SessionStillListed
+                        ? UiText.Get("TerminationPending")
+                        : UiText.Format("SessionTerminated", sessionId);
+                }
             });
         }
         catch (Exception ex)
@@ -895,22 +801,9 @@ public sealed class ScreenManagerWindow : Window
                 if (_isClosing)
                     return;
 
-                if (terminationRequested)
-                {
-                    // Zadanie wyslano, ale odczyt listy sie nie powiodl.
-                    // Nie zostawiamy starej listy jako aktualnej.
-                    UpdateSessionList(Array.Empty<ScreenSession>());
-
-                    _status.Text =
-                        "Wyslano zadanie zakonczenia, ale nie odswiezono " +
-                        $"listy: {ex.Message}";
-                }
-                else
-                {
-                    _status.Text =
-                        $"Blad operacji: {ex.Message}. Odswiez liste, " +
-                        "aby sprawdzic stan sesji.";
-                }
+                _status.Text = UiText.Format(
+                    "SessionOperationFailed",
+                    ErrorText.Get(ex));
             });
         }
         finally
@@ -923,8 +816,7 @@ public sealed class ScreenManagerWindow : Window
                     return;
 
                 bool verified =
-                    _verifiedConnection is not null &&
-                    _verifiedConnection == ReadConnectionData();
+                    _connectionService.IsReady(ReadConnectionData());
 
                 _connectButton.Enabled = true;
                 _refreshButton.Enabled = verified;
@@ -949,60 +841,34 @@ public sealed class ScreenManagerWindow : Window
         if (!EnsureConnectionReady())
             return;
 
-        string keyPath = _keyPathField.Text.Trim();
-        string passphrase = _passphraseField.Text;
-        string fingerprint = _fingerprintField.Text.Trim();
-        string sessionName = _sessionNameField.Text.Trim();
-
-        if (!File.Exists(keyPath))
-        {
-            _status.Text = "Nie znaleziono klucza prywatnego.";
-            return;
-        }
-
-        if (string.IsNullOrWhiteSpace(fingerprint))
-        {
-            _status.Text = "Podaj odcisk hosta SHA256.";
-            return;
-        }
+        ScreenConnectionData connection = ReadConnectionData();
+        string sessionName = _sessionNameField.Text;
 
         _isBusy = true;
         _refreshButton.Enabled = false;
         _createButton.Enabled = false;
-        _status.Text = "Tworzenie sesji screen...";
+        _status.Text = UiText.Get("CreatingSession");
 
         try
         {
-            await _screenService.CreateSessionAsync(
-                _device,
-                keyPath,
-                passphrase,
-                fingerprint,
-                sessionName);
-
-            // Pobieramy aktualna liste po utworzeniu sesji.
-            var sessions = await _screenService.GetSessionsAsync(
-                _device,
-                keyPath,
-                passphrase,
-                fingerprint);
+            var result = await Task.Run(
+                () => _connectionService.CreateSessionAsync(
+                    connection,
+                    sessionName));
 
             _app.Invoke(() =>
             {
                 if (_isClosing)
                     return;
 
-                var names = sessions.Count == 0
-                    ? new ObservableCollection<string>(
-                        ["Brak aktywnych sesji screen."])
-                    : new ObservableCollection<string>(
-                        sessions.Select(s =>
-                            $"{s.Id} | {s.State}"));
+                if (result.Sessions is not null)
+                    UpdateSessionList(result.Sessions);
+                else
+                    UpdateSessionList(Array.Empty<ScreenSession>());
 
-                UpdateSessionList(sessions);
-
-                _status.Text =
-                    $"Utworzono sesje: {sessionName}";
+                _status.Text = result.RefreshError is null
+                    ? UiText.Format("SessionCreated", sessionName)
+                    : UiText.Format("CreationRefreshFailed", ErrorText.Get(result.RefreshError));
             });
         }
         catch (Exception ex)
@@ -1010,8 +876,7 @@ public sealed class ScreenManagerWindow : Window
             _app.Invoke(() =>
             {
                 if (!_isClosing)
-                    _status.Text =
-                        $"Blad tworzenia sesji: {ex.Message}";
+                    _status.Text = UiText.Format("SessionCreationFailed", ErrorText.Get(ex));
             });
         }
         finally
@@ -1027,50 +892,4 @@ public sealed class ScreenManagerWindow : Window
             });
         }
     }
-
-
-    private async Task SaveConnectionSettingsAsync(
-        string keyPath,
-        string fingerprint,
-        string passphrase)
-    {
-        var previous = _device.SshSettings
-            ?? new SshConnectionSettings();
-
-        // Najpierw operacja na bezpiecznym magazynie.
-        if (_rememberPassphrase)
-        {
-            _credentialStore.Save(
-                _device.Id,
-                passphrase);
-        }
-        else
-        {
-            _credentialStore.Delete(_device.Id);
-        }
-
-        // Dopiero potem zapis konfiguracji bez hasla.
-        var settings = new SshConnectionSettings
-        {
-            PrivateKeyPath = keyPath,
-            HostFingerprint = fingerprint,
-            RememberPassphrase = _rememberPassphrase,
-            AutoConnect = previous.AutoConnect
-        };
-
-        bool saved = await _deviceService.UpdateSshSettingsAsync(
-            _device.Id,
-            settings);
-
-        if (!saved)
-        {
-            throw new InvalidOperationException(
-                "Nie znaleziono urzadzenia podczas zapisu SSH.");
-        }
-
-        _device.SshSettings = settings;
-    }
-
-
-
 }

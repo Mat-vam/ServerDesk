@@ -1,17 +1,18 @@
-﻿using ServerDesk.TUI.Styling;
-using ServerDesk.Core.Interfaces;
-using ServerDesk.Core.Models;
+﻿using ServerDesk.Core.Models;
+using ServerDesk.Core.Services;
+using ServerDesk.TUI.Localization;
+using ServerDesk.TUI.Styling;
 using Terminal.Gui.App;
+using Terminal.Gui.Input;
 using Terminal.Gui.ViewBase;
 using Terminal.Gui.Views;
-using Terminal.Gui.Input;
 
 namespace ServerDesk.TUI.Views;
 
 public sealed class ScreenConsoleWindow : Window
 {
     private readonly IApplication _app;
-    private readonly IScreenService _screenService;
+    private readonly ScreenConsoleService _consoleService;
     private readonly Device _device;
     private readonly string _sessionId;
 
@@ -29,28 +30,24 @@ public sealed class ScreenConsoleWindow : Window
     private bool _isBusy;
     private bool _isClosing;
 
-    public ScreenConsoleWindow(
-        IApplication app,
-        IScreenService screenService,
-        Device device,
-        string sessionId,
-        string keyPath,
-        string passphrase,
-        string fingerprint)
+    public ScreenConsoleWindow(IApplication app, ScreenConsoleService consoleService, Device device, string sessionId, string keyPath, string passphrase, string fingerprint)
     {
         _app = app;
-        _screenService = screenService;
+        _consoleService = consoleService;
         _device = device;
         _sessionId = sessionId;
         _keyPath = keyPath;
         _passphrase = passphrase;
         _fingerprint = fingerprint;
 
-        Title = $"ServerDesk | {device.Name} | {sessionId} | okno 0";
+        Title = UiText.Format(
+            "ConsoleWindowTitle",
+            device.Name,
+            sessionId);
 
         var consolePanel = new FrameView
         {
-            Title = "Podglad konsoli",
+            Title = UiText.Get("ConsolePreview"),
             X = 0,
             Y = 0,
             Width = Dim.Fill(),
@@ -66,14 +63,14 @@ public sealed class ScreenConsoleWindow : Window
             Height = Dim.Fill(),
             ReadOnly = true,
             WordWrap = false,
-            Text = "Pobieranie konsoli..."
+            Text = UiText.Get("LoadingConsole")
         };
 
         consolePanel.Add(_consoleOutput);
 
         var commandLabel = new Label
         {
-            Text = "Polecenie:",
+            Text = UiText.Get("CommandLabel"),
             X = 1,
             Y = Pos.AnchorEnd(5)
         };
@@ -87,7 +84,7 @@ public sealed class ScreenConsoleWindow : Window
 
         _sendButton = new Button
         {
-            Text = "Wyslij",
+            Text = UiText.Get("Send"),
             X = 1,
             Y = Pos.AnchorEnd(3),
             ShadowStyle = null
@@ -95,7 +92,7 @@ public sealed class ScreenConsoleWindow : Window
 
         _refreshButton = new Button
         {
-            Text = "Odswiez",
+            Text = UiText.Get("Refresh"),
             X = Pos.Right(_sendButton) + 2,
             Y = Pos.AnchorEnd(3),
             ShadowStyle = null
@@ -103,7 +100,7 @@ public sealed class ScreenConsoleWindow : Window
 
         _backButton = new Button
         {
-            Text = "Wroc",
+            Text = UiText.Get("Back"),
             X = Pos.Right(_refreshButton) + 2,
             Y = Pos.AnchorEnd(3),
             ShadowStyle = null
@@ -111,7 +108,7 @@ public sealed class ScreenConsoleWindow : Window
 
         _status = new Label
         {
-            Text = $"Sesja: {sessionId}",
+            Text = UiText.Format("SessionLabel", sessionId),
             X = 1,
             Y = Pos.AnchorEnd(1),
             Width = Dim.Fill(1)
@@ -185,94 +182,72 @@ public sealed class ScreenConsoleWindow : Window
 
         string text = _commandField.Text;
 
-        if (sendCommand && string.IsNullOrWhiteSpace(text))
-        {
-            _status.Text = "Wpisz polecenie.";
-            return;
-        }
-
         SetBusy(true);
 
         _status.Text = sendCommand
-            ? "Wysylanie polecenia..."
-            : "Pobieranie konsoli...";
-
-        bool commandSent = false;
+            ? UiText.Get("SendingCommand")
+            : UiText.Get("LoadingConsole");
 
         try
         {
-            string output = await Task.Run(async () =>
-            {
-                if (sendCommand)
-                {
-                    await _screenService.SendCommandAsync(
+            // Widok wybiera operacje na podstawie akcji uzytkownika.
+            // Jej przebieg i walidacja znajduja sie w serwisie.
+            var result = await Task.Run(() =>
+                sendCommand
+                    ? _consoleService.SendAndRefreshAsync(
                         _device,
                         _keyPath,
                         _passphrase,
                         _fingerprint,
                         _sessionId,
-                        text);
-
-                    commandSent = true;
-
-                    // Krotka chwila na pojawienie sie odpowiedzi
-                    // programu w konsoli. Nie blokuje interfejsu.
-                    await Task.Delay(250);
-                }
-
-                // Pobieramy podglad zarowno po wyslaniu,
-                // jak i przy zwyklym odswiezaniu.
-                return await _screenService.GetConsoleOutputAsync(
-                    _device,
-                    _keyPath,
-                    _passphrase,
-                    _fingerprint,
-                    _sessionId);
-            });
+                        text)
+                    : _consoleService.RefreshAsync(
+                        _device,
+                        _keyPath,
+                        _passphrase,
+                        _fingerprint,
+                        _sessionId));
 
             _app.Invoke(() =>
             {
                 if (_isClosing)
                     return;
 
-                if (commandSent)
+                if (result.CommandSent)
                     _commandField.Text = "";
 
-                string displayOutput = output.TrimEnd();
+                if (result.RefreshError is not null)
+                {
+                    _status.Text = UiText.Format(
+                        "CommandSentRefreshFailed",
+                        ErrorText.Get(result.RefreshError));
+
+                    return;
+                }
+
+                // Formatowanie tekstu nalezy do prezentacji.
+                string displayOutput = result.Output?.TrimEnd() ?? "";
 
                 _consoleOutput.Text =
                     string.IsNullOrWhiteSpace(displayOutput)
-                        ? "(Konsola jest pusta.)"
+                        ? UiText.Get("ConsoleEmpty")
                         : displayOutput;
 
                 _consoleOutput.MoveEnd();
 
-                _status.Text = commandSent
-                    ? $"Wyslano i odswiezono: {DateTime.Now:HH:mm:ss}"
-                    : $"Odswiezono: {DateTime.Now:HH:mm:ss}";
+                _status.Text = result.CommandSent
+                    ? UiText.Format("CommandSentAndRefreshed", DateTime.Now)
+                    : UiText.Format("RefreshedAt", DateTime.Now);
             });
         }
         catch (Exception ex)
         {
             _app.Invoke(() =>
             {
-                if (_isClosing)
-                    return;
-
-                if (commandSent)
-                {
-                    // Polecenie juz wyslano. Blad dotyczy odczytu,
-                    // wiec nie sugerujemy ponownego wysylania.
-                    _commandField.Text = "";
-
-                    _status.Text =
-                        $"Polecenie wyslano, ale podglad nie zostal " +
-                        $"odswiezony: {ex.Message}";
-                }
-                else
-                {
-                    _status.Text = $"Blad: {ex.Message}";
-                }
+                if (!_isClosing)
+                    _status.Text = UiText.Format(
+                        "ErrorDetails",
+                        ErrorText.Get(ex));
             });
         }
         finally

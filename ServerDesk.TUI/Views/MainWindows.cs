@@ -9,14 +9,20 @@ using Terminal.Gui;
 using ServerDesk.TUI.Components;
 using Terminal.Gui.Input;
 using ServerDesk.Core.Interfaces;
+using ServerDesk.TUI.Localization;
 
 namespace ServerDesk.TUI.Views;
 
 public sealed class MainWindow : Window
 {
+    private readonly AppSettingsService _appSettingsService;
+    private readonly Button _languageButton;
+
     private readonly IApplication _app;
     private readonly DeviceService _deviceService;
-    private readonly IScreenService _screenService;
+    private readonly ScreenManagerService _screenService;
+    private readonly ScreenConsoleService _consoleService;
+    private readonly SshSettingsService _sshSettingsService;
     private readonly Button _screensButton;
     private readonly List<Device> _devices;
 
@@ -59,19 +65,29 @@ public sealed class MainWindow : Window
     );
 
 
-    public MainWindow(IApplication app, DeviceService deviceService, IEnumerable<Device> devices, IScreenService screenService)
+    public MainWindow(
+        IApplication app,
+        DeviceService deviceService,
+        IEnumerable<Device> devices,
+        ScreenManagerService screenService,
+        ScreenConsoleService consoleService,
+        SshSettingsService sshSettingsService,
+        AppSettingsService appSettingsService)
     {
         _app = app;
         _deviceService = deviceService;
         _screenService = screenService;
+        _appSettingsService = appSettingsService;
+        _consoleService = consoleService;
+        _sshSettingsService = sshSettingsService;
         _devices = devices.ToList();
 
-        Title = "ServerDesk | Device Manager";
+        Title = UiText.Get("MainWindowTitle");
 
         // PANEL LEWY
         _leftPanel = new FrameView
         {
-            Title = "Urzadzenia",
+            Title = UiText.Get("Devices"),
             X = 0,
             Y = 0,
             Width = Dim.Percent(35),
@@ -94,7 +110,7 @@ public sealed class MainWindow : Window
 
         var searchLabel = new Label
         {
-            Text = "Szukaj:",
+            Text = UiText.Get("SearchLabel"),
             X = 0,
             Y = 0
         };
@@ -110,7 +126,7 @@ public sealed class MainWindow : Window
 
         _searchButton = new Button
         {
-            Text = "Znajdz nastepne",
+            Text = UiText.Get("FindNext"),
             X = 0,
             Y = 2,
             CanFocus = true,
@@ -192,7 +208,7 @@ public sealed class MainWindow : Window
         // PANEL PRAWY
         _rightPanel = new FrameView
         {
-            Title = "Dane urzadzenia",
+            Title = UiText.Get("DeviceDetails"),
             X = Pos.Right(_leftPanel),
             Y = 0,
             Width = Dim.Fill(),
@@ -204,7 +220,7 @@ public sealed class MainWindow : Window
 
         var nameLabel = new Label
         {
-            Text = "Nazwa:",
+            Text = UiText.Get("NameLabel"),
             X = 1,
             Y = 1
         };
@@ -213,7 +229,7 @@ public sealed class MainWindow : Window
 
         var hostLabel = new Label
         {
-            Text = "Adres IP / Host:",
+            Text = UiText.Get("HostLabel"),
             X = 1,
             Y = 4
         };
@@ -222,7 +238,7 @@ public sealed class MainWindow : Window
 
         var portLabel = new Label
         {
-            Text = "Port SSH:",
+            Text = UiText.Get("SshPortLabel"),
             X = 1,
             Y = 7
         };
@@ -232,7 +248,7 @@ public sealed class MainWindow : Window
 
         var usernameLabel = new Label
         {
-            Text = "Uzytkownik SSH:",
+            Text = UiText.Get("SshUserLabel"),
             X = 1,
             Y = 10
         };
@@ -242,7 +258,7 @@ public sealed class MainWindow : Window
         // PANEL DOLNY AKCJI
         _actionPanel = new FrameView
         {
-            Title = "Akcje",
+            Title = UiText.Get("Actions"),
             X = 0,
             Y = Pos.AnchorEnd(5),
             Width = Dim.Fill(),
@@ -252,7 +268,7 @@ public sealed class MainWindow : Window
 
         _newButton = new Button
         {
-            Text = "Nowe",
+            Text = UiText.Get("New"),
             X = 1,
             Y = 0,
             ShadowStyle = null
@@ -260,7 +276,7 @@ public sealed class MainWindow : Window
 
         _saveButton = new Button
         {
-            Text = "Zapisz",
+            Text = UiText.Get("Save"),
             X = Pos.Right(_newButton) + 2,
             Y = 0,
             ShadowStyle = null
@@ -268,7 +284,7 @@ public sealed class MainWindow : Window
 
         _deleteButton = new Button
         {
-            Text = "Usun",
+            Text = UiText.Get("Delete"),
             X = Pos.Right(_saveButton) + 2,
             Y = 0,
             ShadowStyle = null
@@ -276,7 +292,7 @@ public sealed class MainWindow : Window
 
         _screensButton = new Button
         {
-            Text = "Sesje Screen",
+            Text = UiText.Get("ScreenSessions"),
             X = Pos.Right(_deleteButton) + 2,
             Y = 0,
             ShadowStyle = null,
@@ -311,13 +327,24 @@ public sealed class MainWindow : Window
             X = 1,
             Y = Pos.AnchorEnd(1),
             Width = Dim.Fill(1),
-            Text = "Gotowe."
+            Text = UiText.Get("Ready")
+        };
+
+        _languageButton = new Button
+        {
+            Text = UiText.Get("LanguageButton"),
+            X = 1,
+            Y = Pos.AnchorEnd(2),
+            ShadowStyle = null,
+            CanFocus = true,
+            TabStop = TabBehavior.TabStop
         };
 
         Add(
             _leftPanel,
             _rightPanel,
             _actionPanel,
+            _languageButton,
             _status);
 
         // OBSLUGA ZDARZEN
@@ -360,6 +387,11 @@ public sealed class MainWindow : Window
 
     private void RegisterEvents()
     {
+        _languageButton.Accepted += async (_, _) =>
+        {
+            await ChangeLanguageAsync();
+        };
+
         _screensButton.Accepted += async (_, _) =>
         {
             await OpenScreenManagerAsync();
@@ -454,7 +486,52 @@ public sealed class MainWindow : Window
         }
     }
 
+    private async Task ChangeLanguageAsync()
+    {
+        if (_isBusy || _isNavigating)
+            return;
 
+        _isNavigating = true;
+
+        try
+        {
+            int? answer = MessageBox.Query(
+                _app,
+                UiText.Get("LanguageTitle"),
+                UiText.Get("LanguagePrompt"),
+                UiText.Get("LanguageEnglish"),
+                UiText.Get("LanguagePolish"),
+                UiText.Get("Cancel"));
+
+            if (answer is not (0 or 1))
+                return;
+
+            string language = answer == 0 ? "en" : "pl";
+
+            _isBusy = true;
+            _languageButton.Enabled = false;
+
+            await _appSettingsService.SetLanguageAsync(language);
+
+            _status.Text = UiText.Get("LanguageSavedRestart");
+
+            MessageBox.Query(
+                _app,
+                UiText.Get("LanguageTitle"),
+                UiText.Get("LanguageSavedRestart"),
+                UiText.Get("OK"));
+        }
+        catch (Exception ex)
+        {
+            ShowError(ex);
+        }
+        finally
+        {
+            _isBusy = false;
+            _isNavigating = false;
+            _languageButton.Enabled = true;
+        }
+    }
 
     // Wyszukiwanie urzadzen
     private void FindNextDevice()
@@ -462,22 +539,11 @@ public sealed class MainWindow : Window
         if (_isBusy || _isNavigating)
             return;
 
-        string query = _searchField.Text.Trim();
+        string query = _searchField.Text;
 
         if (string.IsNullOrWhiteSpace(query))
         {
-            _status.Text = "Wpisz tekst do wyszukania.";
-            return;
-        }
-
-        var matches = DeviceSearchService.FindMatches(
-            _devices,
-            query
-        );
-
-        if (matches.Count == 0)
-        {
-            _status.Text = $"Brak wynikow dla: {query}";
+            _status.Text = UiText.Get("EnterSearchText");
             return;
         }
 
@@ -485,42 +551,37 @@ public sealed class MainWindow : Window
             ? index
             : -1;
 
-        // Znajdujemy pierwszy pasujacy element
-        // znajdujacy sie za aktualnym zaznaczeniem.
-        int targetIndex = -1;
+        Guid? currentDeviceId =
+            currentIndex >= 0 && currentIndex < _devices.Count
+                ? _devices[currentIndex].Id
+                : null;
 
-        for (int i = currentIndex + 1; i < _devices.Count; i++)
+        Guid? targetId = DeviceSearchService.FindNextMatch(
+            _devices,
+            query,
+            currentDeviceId);
+
+        if (targetId is not Guid foundId)
         {
-            if (matches.Contains(_devices[i].Id))
-            {
-                targetIndex = i;
-                break;
-            }
+            _status.Text = UiText.Format("NoSearchResults", query); ;
+            return;
         }
 
-        // Jesli doszlismy do konca, zaczynamy od poczatku.
-        if (targetIndex == -1)
-        {
-            targetIndex = _devices.FindIndex(
-                d => matches.Contains(d.Id)
-            );
-        }
+        // Mapowanie wyniku na pozycje kontrolki nalezy do widoku.
+        int targetIndex = _devices.FindIndex(d => d.Id == foundId);
 
         if (targetIndex < 0)
             return;
 
-        // Zmiana Value uruchomi istniejaca obsluge
-        // niezapisanych zmian.
         _deviceList.Value = targetIndex;
 
         if (targetIndex == currentIndex)
         {
-            _status.Text =
-                $"Jedyny pasujacy wynik: {_devices[targetIndex].Name}";
+            _status.Text = UiText.Format(
+                "OnlyMatchingDevice",
+                _devices[targetIndex].Name);
         }
     }
-
-
     // Funkcje do zapamietywania stanu formularza i sprawdzania zmian
     private FormSnapshot GetFormSnapshot()
     {
@@ -600,7 +661,7 @@ public sealed class MainWindow : Window
 
             if (newIndex < 0)
             {
-                _status.Text = "Wybrane urzadzenie nie istnieje.";
+                _status.Text = UiText.Get("SelectedDeviceMissing");
                 return;
             }
 
@@ -615,7 +676,7 @@ public sealed class MainWindow : Window
 
 
     private async Task OpenScreenManagerAsync()
-{
+    {
     if (_isBusy || _isNavigating)
         return;
 
@@ -634,8 +695,7 @@ public sealed class MainWindow : Window
         // zostanie ustawione przez istniejacy kod.
         if (_editingId is not Guid deviceId)
         {
-            _status.Text =
-                "Najpierw wybierz lub zapisz urzadzenie.";
+            _status.Text = UiText.Get("SelectOrSaveDevice");
             return;
         }
 
@@ -643,7 +703,7 @@ public sealed class MainWindow : Window
 
         if (index < 0)
         {
-            _status.Text = "Nie znaleziono urzadzenia.";
+            _status.Text = UiText.Get("DeviceNotFound");
             return;
         }
 
@@ -657,8 +717,9 @@ public sealed class MainWindow : Window
         using (var screenWindow = new ScreenManagerWindow(
             _app,
             _screenService,
-            _deviceService,
-            device))
+            _sshSettingsService,
+            device,
+            _consoleService))
         {
             _app.Run(screenWindow);
         }
@@ -667,12 +728,13 @@ public sealed class MainWindow : Window
         // Po powrocie pobieramy aktualne dane.
         await ReloadDevicesAsync(deviceId);
 
-        _status.Text =
-            $"Powrot z sesji Screen: {device.Name}";
-    }
+        _status.Text = UiText.Format(
+            "ReturnedFromSessions",
+            device.Name);
+        }
     catch (Exception ex)
     {
-        ShowError(ex.Message);
+        ShowError(ex);
     }
     finally
     {
@@ -688,12 +750,11 @@ public sealed class MainWindow : Window
 
         int? answer = MessageBox.Query(
             _app,
-            "Niezapisane zmiany",
-            "Masz niezapisane zmiany. Co chcesz zrobic?",
-            "Zapisz",
-            "Odrzuc",
-            "Anuluj"
-        );
+            UiText.Get("UnsavedChangesTitle"),
+            UiText.Get("UnsavedChangesPrompt"),
+            UiText.Get("Save"),
+            UiText.Get("Discard"),
+            UiText.Get("Cancel"));
 
         switch (answer)
         {
@@ -738,7 +799,7 @@ public sealed class MainWindow : Window
 
             _deviceList.SetSource(names);
 
-            _counter.Text = $"Urzadzenia: {_devices.Count}";
+            _counter.Text = UiText.Format("DeviceCount", _devices.Count);
 
             if (_devices.Count == 0)
             {
@@ -786,7 +847,7 @@ public sealed class MainWindow : Window
 
         var device = _devices[index];
 
-        _rightPanel.Title = $"Edycja: {device.Name}";
+        _rightPanel.Title = UiText.Format("EditingDevice", device.Name);
 
         _displayedIndex = index;
         _editingId = device.Id;
@@ -798,7 +859,7 @@ public sealed class MainWindow : Window
 
         RememberFormState();
 
-        _status.Text = $"Wybrano: {device.Name}";
+        _status.Text = UiText.Format("SelectedDevice", device.Name);
     }
 
 
@@ -814,9 +875,9 @@ public sealed class MainWindow : Window
 
         RememberFormState();
 
-        _rightPanel.Title = "Nowe urzadzenie";
+        _rightPanel.Title = UiText.Get("NewDevice");
 
-        _status.Text = "Nowe urzadzenie - wypelnij formularz.";
+        _status.Text = UiText.Get("NewDeviceHint");
         _nameField.SetFocus();
     }
 
@@ -828,45 +889,27 @@ public sealed class MainWindow : Window
         if (_isBusy)
             return false;
 
-        string name = _nameField.Text.Trim();
-        string host = _hostField.Text.Trim();
-        string username = _usernameField.Text.Trim();
+        string name = _nameField.Text;
+        string host = _hostField.Text;
+        string username = _usernameField.Text;
 
         if (!int.TryParse(_portField.Text, out int port))
         {
-            ShowError("Port musi byc liczba.");
+            ShowError(UiText.Get("PortMustBeNumber"));
             return false;
         }
 
         _isBusy = true;
-        _status.Text = "Zapisywanie urzadzenia...";
+        _status.Text = UiText.Get("SavingDevice");
 
         try
         {
-            Guid savedId;
-
-            if (_editingId.HasValue)
-            {
-                savedId = _editingId.Value;
-
-                bool updated = await _deviceService.UpdateDeviceAsync(
-                    savedId, name, host, port, username
-                );
-
-                if (!updated)
-                {
-                    ShowError("Nie znaleziono urzadzenia.");
-                    return false;
-                }
-            }
-            else
-            {
-                var device = await _deviceService.AddDeviceAsync(
-                    name, host, port, username
-                );
-
-                savedId = device.Id;
-            }
+            Guid savedId = await _deviceService.SaveDeviceAsync(
+                _editingId,
+                name,
+                host,
+                port,
+                username);
 
             // To jest wewnetrzna aktualizacja listy.
             // Nie powinna wywolywac ostrzezen.
@@ -883,12 +926,12 @@ public sealed class MainWindow : Window
 
             RememberFormState();
 
-            _status.Text = "Zmiany zapisane pomyslnie.";
+            _status.Text = UiText.Get("ChangesSaved");
             return true;
         }
         catch (Exception ex)
         {
-            ShowError(ex.Message);
+            ShowError(ex);
             return false;
         }
         finally
@@ -905,7 +948,7 @@ public sealed class MainWindow : Window
 
         if (!_editingId.HasValue)
         {
-            ShowError("Najpierw wybierz urzadzenie.");
+            ShowError(UiText.Get("SelectDeviceFirst"));
             return;
         }
 
@@ -915,23 +958,22 @@ public sealed class MainWindow : Window
 
         if (device is null)
         {
-            ShowError("Nie znaleziono urzadzenia.");
+            ShowError(UiText.Get("DeviceNotFound"));
             return;
         }
 
         int? answer = MessageBox.Query(
             _app,
-            "Potwierdzenie",
-            $"Czy na pewno usunac '{device.Name}'?",
-            "Anuluj",
-            "Usun"
-        );
+            UiText.Get("Confirmation"),
+            UiText.Format("DeleteDevicePrompt", device.Name),
+            UiText.Get("Delete"),
+            UiText.Get("Cancel"));
 
-        if (answer != 1)
+        if (answer != 0)
             return;
 
         _isBusy = true;
-        _status.Text = "Usuwanie urzadzenia...";
+        _status.Text = UiText.Get("DeletingDevice");
 
         try
         {
@@ -941,17 +983,17 @@ public sealed class MainWindow : Window
 
             if (!removed)
             {
-                ShowError("Urzadzenie juz nie istnieje.");
+                ShowError(UiText.Get("DeviceAlreadyMissing"));
                 return;
             }
 
             await ReloadDevicesAsync();
 
-            _status.Text = "Urzadzenie usuniete.";
+            _status.Text = UiText.Get("DeviceDeleted");
         }
         catch (Exception ex)
         {
-            ShowError(ex.Message);
+            ShowError(ex);
         }
         finally
         {
@@ -969,15 +1011,19 @@ public sealed class MainWindow : Window
         RefreshDeviceList(selectId);
     }
 
+    private void ShowError(Exception exception)
+    {
+        ShowError(ErrorText.Get(exception));
+    }
+
     private void ShowError(string message)
     {
-        _status.Text = $"Blad: {message}";
+        _status.Text = UiText.Format("ErrorDetails", message);
 
         MessageBox.ErrorQuery(
             _app,
-            "Blad",
+            UiText.Get("ErrorTitle"),
             message,
-            "OK"
-        );
+            UiText.Get("OK"));
     }
 }

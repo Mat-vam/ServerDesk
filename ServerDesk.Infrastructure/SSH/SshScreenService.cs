@@ -2,6 +2,7 @@
 using Renci.SshNet;
 using ServerDesk.Core.Interfaces;
 using ServerDesk.Core.Models;
+using ServerDesk.Core.Errors;
 
 namespace ServerDesk.Infrastructure.SSH;
 
@@ -10,7 +11,7 @@ public sealed class SshScreenService : IScreenService
     public async Task<IReadOnlyList<ScreenSession>> GetSessionsAsync(Device device, string privateKeyPath, string passphrase, string expectedHostFingerprint, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(expectedHostFingerprint))
-            throw new ArgumentException("Brak zaufanego odcisku klucza serwera.");
+            throw new AppException(AppErrorCode.HostFingerprintRequired);
 
         using var privateKey = new PrivateKeyFile(
             privateKeyPath,
@@ -43,12 +44,8 @@ public sealed class SshScreenService : IScreenService
         await command.ExecuteAsync(cancellationToken);
 
         // screen -ls moze zwrocic kod 1, kiedy nie ma sesji.
-        if (command.ExitStatus != 0 &&
-            command.ExitStatus != 1)
-        {
-            throw new InvalidOperationException(
-                $"Nie mozna pobrac sesji: {command.Error}");
-        }
+        if (command.ExitStatus != 0 && command.ExitStatus != 1)
+            throw new AppException(AppErrorCode.SshSessionListFailed, command.Error.Trim());
 
         string output = command.Result + "\n" + command.Error;
 
@@ -85,18 +82,11 @@ public sealed class SshScreenService : IScreenService
 
     public async Task CreateSessionAsync(Device device, string privateKeyPath, string passphrase, string expectedHostFingerprint, string sessionName, CancellationToken cancellationToken = default)
     {
-        if (!Regex.IsMatch(
-            sessionName,
-            @"^[a-zA-Z0-9_-]{1,32}$"))
-        {
-            throw new ArgumentException(
-                "Nazwa sesji moze zawierac tylko litery, " +
-                "cyfry, _ i - (maksymalnie 32 znaki).");
-        }
+        if (!Regex.IsMatch(sessionName, @"^[a-zA-Z0-9_-]{1,32}$"))
+            throw new AppException(AppErrorCode.InvalidSessionName);
 
         if (string.IsNullOrWhiteSpace(expectedHostFingerprint))
-            throw new ArgumentException(
-                "Brak zaufanego odcisku klucza hosta.");
+            throw new AppException(AppErrorCode.HostFingerprintRequired);
 
         using var privateKey = new PrivateKeyFile(
             privateKeyPath,
@@ -137,36 +127,21 @@ public sealed class SshScreenService : IScreenService
         await command.ExecuteAsync(cancellationToken);
 
         if (command.ExitStatus != 0)
-        {
-            throw new InvalidOperationException(
-                $"Nie mozna utworzyc sesji: {command.Error}");
-        }
+            throw new AppException(AppErrorCode.SshSessionCreationFailed, command.Error.Trim());
     }
 
 
     public async Task SendCommandAsync(Device device, string privateKeyPath, string passphrase, string expectedHostFingerprint, string sessionId, string text, CancellationToken cancellationToken = default)
     {
         // Identyfikator sesji musi miec oczekiwany format.
-        if (!Regex.IsMatch(
-            sessionId,
-            @"^\d+\.[A-Za-z0-9_.-]+$"))
-        {
-            throw new ArgumentException(
-                "Nieprawidlowy identyfikator sesji.");
-        }
+        if (!Regex.IsMatch(sessionId, @"^\d+\.[A-Za-z0-9_.-]+$"))
+            throw new AppException(AppErrorCode.InvalidSessionId);
 
-        if (string.IsNullOrWhiteSpace(text) ||
-            text.Length > 512 ||
-            text.Any(char.IsControl))
-        {
-            throw new ArgumentException(
-                "Polecenie musi miec 1-512 znakow " +
-                "i nie moze zawierac znakow sterujacych.");
-        }
+        if (string.IsNullOrWhiteSpace(text) || text.Length > 512 || text.Any(char.IsControl))
+            throw new AppException(AppErrorCode.InvalidCommand);
 
         if (string.IsNullOrWhiteSpace(expectedHostFingerprint))
-            throw new ArgumentException(
-                "Brak odcisku klucza hosta.");
+            throw new AppException(AppErrorCode.HostFingerprintRequired);
 
         using var privateKey = new PrivateKeyFile(
             privateKeyPath, passphrase);
@@ -209,29 +184,16 @@ public sealed class SshScreenService : IScreenService
         await command.ExecuteAsync(cancellationToken);
 
         if (command.ExitStatus != 0)
-        {
-            throw new InvalidOperationException(
-                "Nie udalo sie wyslac polecenia: " +
-                command.Error);
-        }
+            throw new AppException(AppErrorCode.SshCommandSendFailed, command.Error.Trim());
     }
 
     public async Task<string> GetConsoleOutputAsync(Device device, string privateKeyPath, string passphrase, string expectedHostFingerprint, string sessionId, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(sessionId) ||
-            !Regex.IsMatch(sessionId, @"^\d+\.[A-Za-z0-9_.-]+$"))
-        {
-            throw new ArgumentException(
-                "Nieprawidlowy identyfikator sesji.",
-                nameof(sessionId));
-        }
+        if (string.IsNullOrWhiteSpace(sessionId) || !Regex.IsMatch(sessionId, @"^\d+\.[A-Za-z0-9_.-]+$"))
+            throw new AppException(AppErrorCode.InvalidSessionId);
 
         if (string.IsNullOrWhiteSpace(expectedHostFingerprint))
-        {
-            throw new ArgumentException(
-                "Brak zaufanego odcisku klucza hosta.",
-                nameof(expectedHostFingerprint));
-        }
+            throw new AppException(AppErrorCode.HostFingerprintRequired);
 
         string fingerprint = expectedHostFingerprint.Trim();
 
@@ -240,9 +202,7 @@ public sealed class SshScreenService : IScreenService
 
         if (string.IsNullOrWhiteSpace(fingerprint))
         {
-            throw new ArgumentException(
-                "Nieprawidlowy odcisk klucza hosta.",
-                nameof(expectedHostFingerprint));
+            throw new AppException(AppErrorCode.InvalidHostFingerprint);
         }
 
         // Cytowanie jednego argumentu powloki POSIX.
@@ -299,7 +259,7 @@ public sealed class SshScreenService : IScreenService
         screen -S {{id}} -p 0 -Q info >/dev/null
 
         if [ ! -f "$tmpdir/output.txt" ]; then
-            printf '%s\n' 'Screen nie utworzyl pliku hardcopy.' >&2
+            printf '%s\n' 'SERVERDESK_HARDCOPY_MISSING' >&2
             exit 1
         fi
 
@@ -317,36 +277,39 @@ public sealed class SshScreenService : IScreenService
 
         if (command.ExitStatus != 0)
         {
-            throw new InvalidOperationException(
-                "Nie mozna pobrac konsoli: " +
-                command.Error.Trim());
+            string details = command.Error.Trim();
+
+            bool hardcopyMissing = details
+                .Split('\n')
+                .Any(line => string.Equals(
+                    line.Trim(),
+                    "SERVERDESK_HARDCOPY_MISSING",
+                    StringComparison.Ordinal));
+
+            if (hardcopyMissing)
+                throw new AppException(AppErrorCode.SshHardcopyMissing);
+
+            throw new AppException(
+                AppErrorCode.SshConsoleReadFailed,
+                details);
         }
 
         return command.Result;
     }
 
     public async Task TerminateSessionAsync(
-    Device device,
-    string privateKeyPath,
-    string passphrase,
-    string expectedHostFingerprint,
-    string sessionId,
-    CancellationToken cancellationToken = default)
+        Device device,
+        string privateKeyPath,
+        string passphrase,
+        string expectedHostFingerprint,
+        string sessionId,
+        CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(sessionId) ||
-            !Regex.IsMatch(sessionId, @"^\d+\.[A-Za-z0-9_.-]+$"))
-        {
-            throw new ArgumentException(
-                "Nieprawidlowy identyfikator sesji.",
-                nameof(sessionId));
-        }
+        if (string.IsNullOrWhiteSpace(sessionId) || !Regex.IsMatch(sessionId, @"^\d+\.[A-Za-z0-9_.-]+$"))
+            throw new AppException(AppErrorCode.InvalidSessionId);
 
         if (string.IsNullOrWhiteSpace(expectedHostFingerprint))
-        {
-            throw new ArgumentException(
-                "Brak zaufanego odcisku klucza hosta.",
-                nameof(expectedHostFingerprint));
-        }
+            throw new AppException(AppErrorCode.HostFingerprintRequired);
 
         string fingerprint = expectedHostFingerprint.Trim();
 
@@ -354,11 +317,7 @@ public sealed class SshScreenService : IScreenService
             fingerprint = fingerprint["SHA256:".Length..];
 
         if (string.IsNullOrWhiteSpace(fingerprint))
-        {
-            throw new ArgumentException(
-                "Nieprawidlowy odcisk klucza hosta.",
-                nameof(expectedHostFingerprint));
-        }
+            throw new AppException(AppErrorCode.InvalidHostFingerprint);
 
         using var privateKey = new PrivateKeyFile(
             privateKeyPath,
@@ -396,8 +355,7 @@ public sealed class SshScreenService : IScreenService
         {
             string details = (command.Error + "\n" + command.Result).Trim();
 
-            throw new InvalidOperationException(
-                "Nie mozna zakonczyc sesji: " + details);
+            throw new AppException(AppErrorCode.SshSessionTerminationFailed, details);
         }
     }
 

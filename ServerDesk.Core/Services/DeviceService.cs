@@ -1,5 +1,7 @@
 ﻿using ServerDesk.Core.Interfaces;
 using ServerDesk.Core.Models;
+using ServerDesk.Core.Errors;
+
 namespace ServerDesk.Core.Services;
 
 public sealed class DeviceService
@@ -20,22 +22,22 @@ public sealed class DeviceService
     {
         if (string.IsNullOrWhiteSpace(name))
         {
-            throw new ArgumentException("Nazwa urządzenia nie może być pusta.");
+            throw new AppException(AppErrorCode.DeviceNameRequired);
         }
 
         if (string.IsNullOrWhiteSpace(host))
         {
-            throw new ArgumentException("Adres urządzenia nie może być pusty.");
+            throw new AppException(AppErrorCode.DeviceHostRequired);
         }
 
         if (port < 1 || port > 65535)
         {
-            throw new ArgumentOutOfRangeException(nameof(port), "Nieprawidłowy port.");
+            throw new AppException(AppErrorCode.DevicePortOutOfRange);
         }
 
         if (string.IsNullOrWhiteSpace(username))
         {
-            throw new ArgumentException("Nazwa użytkownika nie może być pusta.");
+            throw new AppException(AppErrorCode.DeviceUsernameRequired);
         }
 
         var devices = (await _repository.GetAllAsync(cancellationToken)).ToList();
@@ -75,22 +77,22 @@ public sealed class DeviceService
     {
         if (string.IsNullOrWhiteSpace(name))
         {
-            throw new ArgumentException("Nazwa urządzenia nie może być pusta.");
+            throw new AppException(AppErrorCode.DeviceNameRequired);
         }
 
         if (string.IsNullOrWhiteSpace(host))
         {
-            throw new ArgumentException("Adres urządzenia nie może być pusty.");
+            throw new AppException(AppErrorCode.DeviceHostRequired);
         }
 
         if (port < 1 || port > 65535)
         {
-            throw new ArgumentOutOfRangeException(nameof(port), "Port musi być w zakresie 1-65535.");
+            throw new AppException(AppErrorCode.DevicePortOutOfRange);
         }
 
         if (string.IsNullOrWhiteSpace(username))
         {
-            throw new ArgumentException("Nazwa użytkownika nie może być pusta.");
+            throw new AppException(AppErrorCode.DeviceUsernameRequired);
         }
 
         var devices = (await _repository.GetAllAsync(
@@ -140,5 +142,39 @@ public sealed class DeviceService
         return true;
     }
 
+    public async Task<Guid> SaveDeviceAsync(
+        Guid? deviceId,
+        string name,
+        string host,
+        int port,
+        string username,
+        CancellationToken cancellationToken = default)
+    {
+        if (deviceId is Guid existingId)
+        {
+            bool updated = await UpdateDeviceAsync(
+                existingId,
+                name,
+                host,
+                port,
+                username,
+                cancellationToken);
 
+            if (!updated)
+            {
+                throw new AppException(AppErrorCode.DeviceNotFound);
+            }
+
+            return existingId;
+        }
+
+        Device device = await AddDeviceAsync(
+            name,
+            host,
+            port,
+            username,
+            cancellationToken);
+
+        return device.Id;
+    }
 }

@@ -1,0 +1,537 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Actions" xml:space="preserve">
+    <value>Actions</value>
+  </data>
+  <data name="Back" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="ChangesSaved" xml:space="preserve">
+    <value>Changes saved successfully.</value>
+  </data>
+  <data name="CheckingSshAccess" xml:space="preserve">
+    <value>Verifying SSH access...</value>
+  </data>
+  <data name="CommandLabel" xml:space="preserve">
+    <value>Command:</value>
+  </data>
+  <data name="CommandSentAndRefreshed" xml:space="preserve">
+    <value>Sent and refreshed: {0:HH:mm:ss}</value>
+  </data>
+  <data name="CommandSentRefreshFailed" xml:space="preserve">
+    <value>Command sent, but console refresh failed: {0}</value>
+  </data>
+  <data name="Confirmation" xml:space="preserve">
+    <value>Confirmation</value>
+  </data>
+  <data name="Connect" xml:space="preserve">
+    <value>Connect</value>
+  </data>
+  <data name="ConnectHint" xml:space="preserve">
+    <value>Complete the settings and click Connect.</value>
+  </data>
+  <data name="ConnectionFailed" xml:space="preserve">
+    <value>Connection failed: {0}</value>
+  </data>
+  <data name="ConnectionNotVerified" xml:space="preserve">
+    <value>Connection settings are not verified. Click Connect.</value>
+  </data>
+  <data name="ConnectionSettingsChanged" xml:space="preserve">
+    <value>Connection settings changed. Connect again.</value>
+  </data>
+  <data name="ConnectToSave" xml:space="preserve">
+    <value>Click Connect to save the change.</value>
+  </data>
+  <data name="ConsoleEmpty" xml:space="preserve">
+    <value>(Console is empty.)</value>
+  </data>
+  <data name="ConsoleOpenFailed" xml:space="preserve">
+    <value>Cannot open console: {0}</value>
+  </data>
+  <data name="ConsolePreview" xml:space="preserve">
+    <value>Console preview</value>
+  </data>
+  <data name="ConsoleWindowTitle" xml:space="preserve">
+    <value>ServerDesk | {0} | {1} | window 0</value>
+  </data>
+  <data name="ContinuePrompt" xml:space="preserve">
+    <value>Continue?</value>
+  </data>
+  <data name="CreateSessionAction" xml:space="preserve">
+    <value>Create</value>
+  </data>
+  <data name="CreatingSession" xml:space="preserve">
+    <value>Creating session...</value>
+  </data>
+  <data name="CreationRefreshFailed" xml:space="preserve">
+    <value>Session created, but list refresh failed: {0}</value>
+  </data>
+  <data name="CredentialStoreWindowsOnly" xml:space="preserve">
+    <value>This credential store requires Windows.</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="DeleteDevicePrompt" xml:space="preserve">
+    <value>Delete device '{0}'?</value>
+  </data>
+  <data name="DeletingDevice" xml:space="preserve">
+    <value>Deleting device...</value>
+  </data>
+  <data name="DeviceAlreadyMissing" xml:space="preserve">
+    <value>The device no longer exists.</value>
+  </data>
+  <data name="DeviceCount" xml:space="preserve">
+    <value>Devices: {0}</value>
+  </data>
+  <data name="DeviceDeleted" xml:space="preserve">
+    <value>Device deleted.</value>
+  </data>
+  <data name="DeviceDetails" xml:space="preserve">
+    <value>Device details</value>
+  </data>
+  <data name="DeviceHostRequired" xml:space="preserve">
+    <value>Device address cannot be empty.</value>
+  </data>
+  <data name="DeviceLabelFormat" xml:space="preserve">
+    <value>Device: {0}</value>
+  </data>
+  <data name="DeviceNameRequired" xml:space="preserve">
+    <value>Device name cannot be empty.</value>
+  </data>
+  <data name="DeviceNotFound" xml:space="preserve">
+    <value>Device was not found.</value>
+  </data>
+  <data name="DevicePortOutOfRange" xml:space="preserve">
+    <value>Port must be between 1 and 65535.</value>
+  </data>
+  <data name="Devices" xml:space="preserve">
+    <value>Devices</value>
+  </data>
+  <data name="DeviceUsernameRequired" xml:space="preserve">
+    <value>SSH username cannot be empty.</value>
+  </data>
+  <data name="Discard" xml:space="preserve">
+    <value>Discard</value>
+  </data>
+  <data name="EditingDevice" xml:space="preserve">
+    <value>Edit: {0}</value>
+  </data>
+  <data name="EnterSearchText" xml:space="preserve">
+    <value>Enter text to search.</value>
+  </data>
+  <data name="ErrorDetails" xml:space="preserve">
+    <value>Error: {0}</value>
+  </data>
+  <data name="ErrorTitle" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="ErrorWithDetails" xml:space="preserve">
+    <value>{0} Details: {1}</value>
+  </data>
+  <data name="FindNext" xml:space="preserve">
+    <value>Find next</value>
+  </data>
+  <data name="ForgetPassphrase" xml:space="preserve">
+    <value>Forget passphrase</value>
+  </data>
+  <data name="GnuScreenSessions" xml:space="preserve">
+    <value>GNU Screen sessions</value>
+  </data>
+  <data name="HostFingerprintLabel" xml:space="preserve">
+    <value>Trusted host fingerprint (SHA256):</value>
+  </data>
+  <data name="HostFingerprintRequired" xml:space="preserve">
+    <value>Trusted host fingerprint is required.</value>
+  </data>
+  <data name="HostLabel" xml:space="preserve">
+    <value>IP address / Host:</value>
+  </data>
+  <data name="HostLabelFormat" xml:space="preserve">
+    <value>Host: {0}:{1}</value>
+  </data>
+  <data name="InvalidCommand" xml:space="preserve">
+    <value>Command must contain 1–512 characters and no control characters.</value>
+  </data>
+  <data name="InvalidHostFingerprint" xml:space="preserve">
+    <value>Invalid host fingerprint.</value>
+  </data>
+  <data name="InvalidLanguage" xml:space="preserve">
+    <value>Unsupported application language.</value>
+  </data>
+  <data name="InvalidSessionId" xml:space="preserve">
+    <value>Invalid session identifier.</value>
+  </data>
+  <data name="InvalidSessionName" xml:space="preserve">
+    <value>Session name must contain 1–32 letters, digits, underscores or hyphens.</value>
+  </data>
+  <data name="InvalidStoredCredential" xml:space="preserve">
+    <value>The stored credential is invalid.</value>
+  </data>
+  <data name="LanguageButton" xml:space="preserve">
+    <value>PL / EN</value>
+  </data>
+  <data name="LanguageEnglish" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="LanguagePolish" xml:space="preserve">
+    <value>Polski</value>
+  </data>
+  <data name="LanguagePrompt" xml:space="preserve">
+    <value>Select the language for the next application startup.</value>
+  </data>
+  <data name="LanguageSavedRestart" xml:space="preserve">
+    <value>Language saved. Restart the application to apply it.</value>
+  </data>
+  <data name="LanguageTitle" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="LoadingConsole" xml:space="preserve">
+    <value>Loading console...</value>
+  </data>
+  <data name="MainWindowTitle" xml:space="preserve">
+    <value>ServerDesk | Device Manager</value>
+  </data>
+  <data name="NameLabel" xml:space="preserve">
+    <value>Name:</value>
+  </data>
+  <data name="New" xml:space="preserve">
+    <value>New</value>
+  </data>
+  <data name="NewDevice" xml:space="preserve">
+    <value>New device</value>
+  </data>
+  <data name="NewDeviceHint" xml:space="preserve">
+    <value>New device — complete the form.</value>
+  </data>
+  <data name="NewSessionNameLabel" xml:space="preserve">
+    <value>New session name:</value>
+  </data>
+  <data name="NoActiveSessions" xml:space="preserve">
+    <value>No active Screen sessions.</value>
+  </data>
+  <data name="NoSearchResults" xml:space="preserve">
+    <value>No results for: {0}</value>
+  </data>
+  <data name="NoSessionSelected" xml:space="preserve">
+    <value>No session selected.</value>
+  </data>
+  <data name="OK" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="OnlyMatchingDevice" xml:space="preserve">
+    <value>Only matching device: {0}</value>
+  </data>
+  <data name="OpenConsoleAction" xml:space="preserve">
+    <value>Console</value>
+  </data>
+  <data name="PassphraseDeleteFailed" xml:space="preserve">
+    <value>Cannot forget passphrase: {0}</value>
+  </data>
+  <data name="PassphraseForgotten" xml:space="preserve">
+    <value>Passphrase forgotten. Complete the settings and click Connect.</value>
+  </data>
+  <data name="PassphraseLabel" xml:space="preserve">
+    <value>Passphrase:</value>
+  </data>
+  <data name="PassphraseLoadFailed" xml:space="preserve">
+    <value>Cannot load passphrase: {0}</value>
+  </data>
+  <data name="PassphraseTooLong" xml:space="preserve">
+    <value>Passphrase is too long for the credential store.</value>
+  </data>
+  <data name="PortMustBeNumber" xml:space="preserve">
+    <value>Port must be a valid number.</value>
+  </data>
+  <data name="PrivateKeyLabel" xml:space="preserve">
+    <value>Private key:</value>
+  </data>
+  <data name="PrivateKeyPathRequired" xml:space="preserve">
+    <value>Private key path is required.</value>
+  </data>
+  <data name="Ready" xml:space="preserve">
+    <value>Ready.</value>
+  </data>
+  <data name="Refresh" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="RefreshedAt" xml:space="preserve">
+    <value>Refreshed: {0:HH:mm:ss}</value>
+  </data>
+  <data name="RefreshingSessions" xml:space="preserve">
+    <value>Refreshing session list...</value>
+  </data>
+  <data name="RememberPassphraseOff" xml:space="preserve">
+    <value>Remember: OFF</value>
+  </data>
+  <data name="RememberPassphraseOn" xml:space="preserve">
+    <value>Remember: ON</value>
+  </data>
+  <data name="ReturnedFromConsole" xml:space="preserve">
+    <value>Returned from console: {0}</value>
+  </data>
+  <data name="ReturnedFromSessions" xml:space="preserve">
+    <value>Returned from Screen sessions: {0}</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="SavedPassphraseLoaded" xml:space="preserve">
+    <value>Passphrase loaded. Click Connect.</value>
+  </data>
+  <data name="SavedPassphraseMissing" xml:space="preserve">
+    <value>No saved passphrase. Enter it again.</value>
+  </data>
+  <data name="SavingDevice" xml:space="preserve">
+    <value>Saving device...</value>
+  </data>
+  <data name="ScreenManagerTitle" xml:space="preserve">
+    <value>ServerDesk | Screen sessions | {0}</value>
+  </data>
+  <data name="ScreenSessions" xml:space="preserve">
+    <value>Screen sessions</value>
+  </data>
+  <data name="ScreenStateAttached" xml:space="preserve">
+    <value>Attached</value>
+  </data>
+  <data name="ScreenStateDetached" xml:space="preserve">
+    <value>Detached</value>
+  </data>
+  <data name="SearchLabel" xml:space="preserve">
+    <value>Search:</value>
+  </data>
+  <data name="SelectDeviceFirst" xml:space="preserve">
+    <value>Select a device first.</value>
+  </data>
+  <data name="SelectedDevice" xml:space="preserve">
+    <value>Selected: {0}</value>
+  </data>
+  <data name="SelectedDeviceMissing" xml:space="preserve">
+    <value>The selected device no longer exists.</value>
+  </data>
+  <data name="SelectedScreenSession" xml:space="preserve">
+    <value>Selected: {0} | {1}</value>
+  </data>
+  <data name="SelectOrSaveDevice" xml:space="preserve">
+    <value>Select or save a device first.</value>
+  </data>
+  <data name="SelectSessionFirst" xml:space="preserve">
+    <value>Select a session first.</value>
+  </data>
+  <data name="Send" xml:space="preserve">
+    <value>Send</value>
+  </data>
+  <data name="SendingCommand" xml:space="preserve">
+    <value>Sending command...</value>
+  </data>
+  <data name="SessionCreated" xml:space="preserve">
+    <value>Session created: {0}</value>
+  </data>
+  <data name="SessionCreationFailed" xml:space="preserve">
+    <value>Cannot create session: {0}</value>
+  </data>
+  <data name="SessionLabel" xml:space="preserve">
+    <value>Session: {0}</value>
+  </data>
+  <data name="SessionList" xml:space="preserve">
+    <value>Session list</value>
+  </data>
+  <data name="SessionManagement" xml:space="preserve">
+    <value>Session management</value>
+  </data>
+  <data name="SessionOperationFailed" xml:space="preserve">
+    <value>Operation failed: {0}. Refresh the list to check the session status.</value>
+  </data>
+  <data name="SessionsNotLoaded" xml:space="preserve">
+    <value>Sessions have not been loaded yet.</value>
+  </data>
+  <data name="SessionsRefreshed" xml:space="preserve">
+    <value>List refreshed | Sessions: {0}</value>
+  </data>
+  <data name="SessionsRefreshFailed" xml:space="preserve">
+    <value>Cannot refresh sessions: {0}</value>
+  </data>
+  <data name="SessionTerminated" xml:space="preserve">
+    <value>Session terminated: {0}</value>
+  </data>
+  <data name="SshAccessVerified" xml:space="preserve">
+    <value>SSH access verified | Sessions: {0}</value>
+  </data>
+  <data name="SshCommandSendFailed" xml:space="preserve">
+    <value>Cannot send the command.</value>
+  </data>
+  <data name="SshConsoleReadFailed" xml:space="preserve">
+    <value>Cannot retrieve console output.</value>
+  </data>
+  <data name="SshHardcopyMissing" xml:space="preserve">
+    <value>Screen did not create the console snapshot file.</value>
+  </data>
+  <data name="SshPortLabel" xml:space="preserve">
+    <value>SSH port:</value>
+  </data>
+  <data name="SshSessionCreationFailed" xml:space="preserve">
+    <value>Cannot create the Screen session.</value>
+  </data>
+  <data name="SshSessionListFailed" xml:space="preserve">
+    <value>Cannot retrieve Screen sessions.</value>
+  </data>
+  <data name="SshSessionTerminationFailed" xml:space="preserve">
+    <value>Cannot terminate the Screen session.</value>
+  </data>
+  <data name="SshSettings" xml:space="preserve">
+    <value>SSH settings</value>
+  </data>
+  <data name="SshUserLabel" xml:space="preserve">
+    <value>SSH user:</value>
+  </data>
+  <data name="TerminateSessionAction" xml:space="preserve">
+    <value>Terminate</value>
+  </data>
+  <data name="TerminateSessionConfirm" xml:space="preserve">
+    <value>Terminate session</value>
+  </data>
+  <data name="TerminateSessionTitle" xml:space="preserve">
+    <value>Terminate session</value>
+  </data>
+  <data name="TerminateSessionWarning" xml:space="preserve">
+    <value>This will close all windows in the session and may stop running programs.</value>
+  </data>
+  <data name="TerminatingSession" xml:space="preserve">
+    <value>Terminating session: {0}</value>
+  </data>
+  <data name="TerminationPending" xml:space="preserve">
+    <value>Termination requested. Refresh the list shortly.</value>
+  </data>
+  <data name="TerminationRefreshFailed" xml:space="preserve">
+    <value>Termination requested, but list refresh failed: {0}</value>
+  </data>
+  <data name="UnsavedChangesPrompt" xml:space="preserve">
+    <value>You have unsaved changes. What would you like to do?</value>
+  </data>
+  <data name="UnsavedChangesTitle" xml:space="preserve">
+    <value>Unsaved changes</value>
+  </data>
+  <data name="WaitForOperation" xml:space="preserve">
+    <value>Wait for the operation to finish.</value>
+  </data>
+</root>
