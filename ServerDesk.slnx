@@ -1,6 +1,7 @@
 <Solution>
+  <Project Path="ServerDesk.Bootstrap/ServerDesk.Bootstrap.csproj" Id="7fe160dd-9f23-4796-8351-1c66c4bc351d" />
   <Project Path="ServerDesk.Core/ServerDesk.Core.csproj" Id="9ab5b3d3-4e89-4216-9375-1bcfb50c122b" />
   <Project Path="ServerDesk.Infrastructure/ServerDesk.Infrastructure.csproj" Id="e4f0de6c-b306-4385-a425-906d24635de3" />
-  <Project Path="ServerDesk.Tests/ServerDesk.Tests.csproj" Id="aef078db-43b8-4940-9b61-8cd021ed9f76" />
   <Project Path="ServerDesk.TUI/ServerDesk.TUI.csproj" Id="d9bfd2dd-eb43-48f7-85a4-3068faab4f85" />
+  <Project Path="ServerDesk.Wpf/ServerDesk.Wpf.csproj" Id="f829983e-8dfc-44c1-b315-0eea71479161" />
 </Solution>

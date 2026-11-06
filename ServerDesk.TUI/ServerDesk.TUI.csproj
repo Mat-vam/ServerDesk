@@ -12,8 +12,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ServerDesk.Bootstrap\ServerDesk.Bootstrap.csproj" />
     <ProjectReference Include="..\ServerDesk.Core\ServerDesk.Core.csproj" />
-    <ProjectReference Include="..\ServerDesk.Infrastructure\ServerDesk.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
