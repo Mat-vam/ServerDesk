@@ -7,6 +7,7 @@ using Terminal.Gui.ViewBase;
 using Terminal.Gui.Views;
 using ServerDesk.Core.Services;
 using ServerDesk.TUI.Localization;
+using ServerDesk.TUI.Components;
 
 namespace ServerDesk.TUI.Views;
 
@@ -299,6 +300,23 @@ public sealed class ScreenManagerWindow : Window
             _sessionsArea,
             _selectedSessionLabel,
             _status);
+
+        KeyboardNavigation.Configure(
+            this,
+            _settingsButton,
+            backButton,
+            _keyPathField,
+            _passphraseField,
+            _rememberButton,
+            _forgetPassphraseButton,
+            _fingerprintField,
+            _connectButton,
+            _sessionNameField,
+            _refreshButton,
+            _createButton,
+            _terminateButton,
+            _previewButton,
+            _sessionList);
 
         _sessionList.SetSource(
             new ObservableCollection<string>([UiText.Get("SessionsNotLoaded")]));

@@ -175,25 +175,6 @@ public sealed class MainWindow : Window
             Text = ""
         };
 
-        _searchButton.KeyDown += (_, key) =>
-        {
-            if (key == Key.Tab)
-            {
-                _deviceList.SetFocus();
-                key.Handled = true;
-            }
-        };
-
-        _deviceList.KeyDown += (_, key) =>
-        {
-            if (key == Key.Tab.WithShift)
-            {
-                _searchButton.SetFocus();
-                key.Handled = true;
-            }
-        };
-
-
         _deviceListPanel.Add(
             _deviceList,
             _counter
@@ -346,6 +327,30 @@ public sealed class MainWindow : Window
             _actionPanel,
             _languageButton,
             _status);
+
+        KeyboardNavigation.Configure(
+            this,
+            _searchField,
+            _searchButton,
+            _deviceList,
+            _nameField,
+            _hostField,
+            _portField,
+            _usernameField,
+            _newButton,
+            _saveButton,
+            _deleteButton,
+            _screensButton,
+            _languageButton);
+
+        _searchField.KeyDown += (_, key) =>
+        {
+            if (key == Key.Enter)
+            {
+                key.Handled = true;
+                FindNextDevice();
+            }
+        };
 
         // OBSLUGA ZDARZEN
         RegisterEvents();

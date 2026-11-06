@@ -6,6 +6,7 @@ using Terminal.Gui.App;
 using Terminal.Gui.Input;
 using Terminal.Gui.ViewBase;
 using Terminal.Gui.Views;
+using ServerDesk.TUI.Components;
 
 namespace ServerDesk.TUI.Views;
 
@@ -122,6 +123,14 @@ public sealed class ScreenConsoleWindow : Window
             _refreshButton,
             _backButton,
             _status);
+
+        KeyboardNavigation.Configure(
+            this,
+            _consoleOutput,
+            _commandField,
+            _sendButton,
+            _refreshButton,
+            _backButton);
 
         _sendButton.Accepted += (_, _) =>
         {
