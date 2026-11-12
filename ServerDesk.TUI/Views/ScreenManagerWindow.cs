@@ -91,8 +91,7 @@ public sealed class ScreenManagerWindow : Window
             Width = Dim.Fill(1)
         };
 
-        // Oba panele zajmuja ten sam obszar.
-        // W danym momencie widoczny jest tylko jeden.
+        // Panele współdzielą miejsce i są wyświetlane naprzemiennie.
         _connectionPanel = new FrameView
         {
             Title = UiText.Get("SshSettings"),
@@ -742,8 +741,7 @@ public sealed class ScreenManagerWindow : Window
             return;
         }
 
-        // Zapamietujemy dokladnie te sesje i dane,
-        // dla ktorych wyswietlimy potwierdzenie.
+        // Zapamiętanie sesji i danych połączenia przed wyświetleniem potwierdzenia.
         string sessionId = _sessions[index].Id;
         ScreenConnectionData connection = ReadConnectionData();
 

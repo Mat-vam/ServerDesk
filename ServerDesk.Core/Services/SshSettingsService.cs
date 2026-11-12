@@ -88,7 +88,6 @@ public sealed class SshSettingsService
         if (!saved)
             throw new AppException(AppErrorCode.DeviceNotFound);
 
-        // Aktualizacja modelu jest odpowiedzialnoscia serwisu.
         device.SshSettings = settings;
     }
 }

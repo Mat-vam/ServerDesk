@@ -81,8 +81,7 @@ public static class AppTheme
 
         if (root is TextView)
         {
-            // Konsola zachowuje neutralne tlo,
-            // takze po otrzymaniu fokusu.
+            // Neutralne tło konsoli także przy aktywnym fokusie.
             var neutral = new GuiAttribute(
                 ColorName16.Gray,
                 ColorName16.Black);

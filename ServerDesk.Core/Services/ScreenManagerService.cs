@@ -95,7 +95,7 @@ public sealed class ScreenManagerService
         string? terminatedSessionId,
         CancellationToken cancellationToken)
     {
-        // Trafiamy tutaj dopiero po udanej operacji zmieniajacej sesje.
+        // Odświeżenie listy po udanej zmianie sesji.
         try
         {
             var sessions = await _screenService.GetSessionsAsync(

@@ -51,8 +51,7 @@ public static class DeviceSearchService
             }
         }
 
-        // Szukamy od nastepnego urzadzenia.
-        // Po dojsciu do konca wracamy na poczatek.
+        // Wyszukiwanie od następnej pozycji z powrotem na początek listy.
         for (int offset = 1; offset <= devices.Count; offset++)
         {
             int index = (currentIndex + offset) % devices.Count;

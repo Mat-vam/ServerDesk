@@ -15,7 +15,7 @@ internal static class KeyboardNavigation
             stop.CanFocus = true;
             stop.TabStop = TabBehavior.TabStop;
 
-            // Fokus musi moc przejsc przez panele nadrzedne.
+            // Panele nadrzędne muszą przyjmować fokus, aby był dostępny w kontrolkach.
             for (View? parent = stop.SuperView;
                  parent is not null && parent != window;
                  parent = parent.SuperView)

@@ -11,9 +11,7 @@ public sealed class DeviceListView : ListView
             (key == Key.CursorUp ||
              key == Key.CursorDown))
         {
-            // ListView nie obsluzyl strzalki,
-            // np. na koncu listy.
-            // Nie przekazujemy jej do globalnej nawigacji.
+            // Strzałki na granicy listy pozostają w obsłudze listy.
             return true;
         }
 

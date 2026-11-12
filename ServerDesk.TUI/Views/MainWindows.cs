@@ -84,7 +84,7 @@ public sealed class MainWindow : Window
 
         Title = UiText.Get("MainWindowTitle");
 
-        // PANEL LEWY
+        // Panel wyszukiwania i listy urządzeń.
         _leftPanel = new FrameView
         {
             Title = UiText.Get("Devices"),
@@ -140,7 +140,6 @@ public sealed class MainWindow : Window
             _searchButton
         );
 
-        // Osobny panel listy urzadzen
         _deviceListPanel = new FrameView
         {
             X = 0,
@@ -180,13 +179,12 @@ public sealed class MainWindow : Window
             _counter
         );
 
-        // Dodajemy oba panele do glownego lewego panelu
         _leftPanel.Add(
             _searchPanel,
             _deviceListPanel
         );
 
-        // PANEL PRAWY
+        // Formularz urządzenia.
         _rightPanel = new FrameView
         {
             Title = UiText.Get("DeviceDetails"),
@@ -236,7 +234,7 @@ public sealed class MainWindow : Window
 
         _usernameField = CreateField(11);
 
-        // PANEL DOLNY AKCJI
+        // Panel akcji.
         _actionPanel = new FrameView
         {
             Title = UiText.Get("Actions"),
@@ -302,7 +300,6 @@ public sealed class MainWindow : Window
             usernameLabel,
             _usernameField);
 
-        // PASEK STATUSU
         _status = new Label
         {
             X = 1,
@@ -352,7 +349,6 @@ public sealed class MainWindow : Window
             }
         };
 
-        // OBSLUGA ZDARZEN
         RegisterEvents();
 
         RefreshDeviceList();
@@ -388,7 +384,6 @@ public sealed class MainWindow : Window
         _counter.SetScheme(AppTheme.CreateAccent());
     }
 
-    // Zdarzenia przyciskow akcji
 
     private void RegisterEvents()
     {
@@ -444,7 +439,6 @@ public sealed class MainWindow : Window
     }
 
 
-    // Responsywnosc przy zmianie rozmiaru okna
     private void UpdateResponsiveLayout()
     {
         int availableWidth = Frame.Width;
@@ -464,7 +458,7 @@ public sealed class MainWindow : Window
 
         if (_compactLayout)
         {
-            // Uklad pionowy - 40% lista, 60% formularz
+            // Układ pionowy z listą nad formularzem.
             _leftPanel.X = 0;
             _leftPanel.Y = 0;
             _leftPanel.Width = Dim.Fill();
@@ -478,7 +472,7 @@ public sealed class MainWindow : Window
 
         else
         {
-            // Uklad poziomy - 35% lista, 65% formularz
+            // Układ poziomy z listą obok formularza.
             _leftPanel.X = 0;
             _leftPanel.Y = 0;
             _leftPanel.Width = Dim.Percent(35);
@@ -538,7 +532,6 @@ public sealed class MainWindow : Window
         }
     }
 
-    // Wyszukiwanie urzadzen
     private void FindNextDevice()
     {
         if (_isBusy || _isNavigating)
@@ -572,7 +565,7 @@ public sealed class MainWindow : Window
             return;
         }
 
-        // Mapowanie wyniku na pozycje kontrolki nalezy do widoku.
+        // Dopasowanie identyfikatora urządzenia do pozycji na liście.
         int targetIndex = _devices.FindIndex(d => d.Id == foundId);
 
         if (targetIndex < 0)
@@ -587,7 +580,6 @@ public sealed class MainWindow : Window
                 _devices[targetIndex].Name);
         }
     }
-    // Funkcje do zapamietywania stanu formularza i sprawdzania zmian
     private FormSnapshot GetFormSnapshot()
     {
         return new FormSnapshot(
@@ -609,7 +601,6 @@ public sealed class MainWindow : Window
     }
     private void SelectDeviceSilently(int index)
     {
-        // Nie ustawiamy nieprawidlowego indeksu.
         if (index < 0 || index >= _devices.Count)
             return;
 
@@ -626,8 +617,6 @@ public sealed class MainWindow : Window
     }
 
 
-    // Funkcja do obslugi zmiany zaznaczenia urzadzenia w przypadku niezapisanych zmian
-    // W taki sposób dane nie zostaną ani utracone, ani nie zostaną zapisane w złym miejscu
     private async Task HandleDeviceSelectionChangedAsync()
     {
         if (_suppressSelectionChanged || _isNavigating)
@@ -647,7 +636,7 @@ public sealed class MainWindow : Window
 
         try
         {
-            // Przywracamy zaznaczenie przed otwarciem dialogu.
+            // Przywrócenie zaznaczenia na czas potwierdzenia.
             if (_displayedIndex >= 0)
             {
                 SelectDeviceSilently(_displayedIndex);
@@ -658,8 +647,7 @@ public sealed class MainWindow : Window
             if (!canLeave)
                 return;
 
-            // Po zapisaniu lista mogla zostac odswiezona.
-            // Dlatego szukamy urzadzenia po ID, nie indeksie.
+            // Identyfikator urządzenia pozostaje ważny po odświeżeniu listy.
             int newIndex = _devices.FindIndex(
                 d => d.Id == targetId
             );
@@ -689,15 +677,11 @@ public sealed class MainWindow : Window
 
     try
     {
-        // Korzystamy z istniejacego pytania:
-        // Zapisz / Odrzuc / Anuluj.
         bool canLeave = await ConfirmDiscardChangesAsync();
 
         if (!canLeave)
             return;
 
-        // Po zapisaniu nowego urzadzenia _editingId
-        // zostanie ustawione przez istniejacy kod.
         if (_editingId is not Guid deviceId)
         {
             _status.Text = UiText.Get("SelectOrSaveDevice");
@@ -712,8 +696,7 @@ public sealed class MainWindow : Window
             return;
         }
 
-        // Przywracamy zapisane dane formularza.
-        // Ma to znaczenie po wybraniu opcji Odrzuc.
+        // Przywrócenie zapisanych danych po odrzuceniu zmian.
         SelectDeviceSilently(index);
         ShowSelectedDevice();
 
@@ -729,8 +712,7 @@ public sealed class MainWindow : Window
             _app.Run(screenWindow);
         }
 
-        // Screen Manager mogl zapisac nowe ustawienia SSH.
-        // Po powrocie pobieramy aktualne dane.
+        // Ponowny odczyt ustawień SSH po powrocie z menedżera sesji.
         await ReloadDevicesAsync(deviceId);
 
         _status.Text = UiText.Format(
@@ -747,7 +729,6 @@ public sealed class MainWindow : Window
     }
 }
 
-    // Funkcja do potwierdzania odrzucenia zmian
     private async Task<bool> ConfirmDiscardChangesAsync()
     {
         if (!HasUnsavedChanges())
@@ -764,15 +745,12 @@ public sealed class MainWindow : Window
         switch (answer)
         {
             case 0:
-                // Zapisz zmiany przed przejsciem dalej
                 return await SaveDeviceAsync();
 
             case 1:
-                // Odrzuc zmiany
                 return true;
 
             default:
-                // Anuluj lub zamkniecie okna dialogowego
                 return false;
         }
     }
@@ -916,8 +894,7 @@ public sealed class MainWindow : Window
                 port,
                 username);
 
-            // To jest wewnetrzna aktualizacja listy.
-            // Nie powinna wywolywac ostrzezen.
+            // Wstrzymanie zdarzeń zaznaczenia podczas odświeżania listy.
             _suppressSelectionChanged = true;
 
             try

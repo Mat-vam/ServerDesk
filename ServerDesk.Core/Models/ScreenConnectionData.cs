@@ -6,6 +6,6 @@ public sealed record ScreenConnectionData(
     string Fingerprint,
     bool RememberPassphrase)
 {
-    // Automatyczny ToString rekordu nie powinien ujawniac hasla.
+    // Reprezentacja tekstowa pomija hasło klucza.
     public override string ToString() => nameof(ScreenConnectionData);
 }

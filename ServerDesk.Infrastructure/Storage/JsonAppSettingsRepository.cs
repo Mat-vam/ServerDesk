@@ -30,7 +30,7 @@ public sealed class JsonAppSettingsRepository : IAppSettingsRepository
         }
         catch (JsonException)
         {
-            // Niepoprawny plik preferencji: ustawienia domyslne.
+            // Użycie ustawień domyślnych po błędzie odczytu JSON.
             return new AppSettings();
         }
     }

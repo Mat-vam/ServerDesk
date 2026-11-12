@@ -43,7 +43,7 @@ public sealed class SshScreenService : IScreenService
 
         await command.ExecuteAsync(cancellationToken);
 
-        // screen -ls moze zwrocic kod 1, kiedy nie ma sesji.
+        // Kod 1 może oznaczać brak sesji.
         if (command.ExitStatus != 0 && command.ExitStatus != 1)
             throw new AppException(AppErrorCode.SshSessionListFailed, command.Error.Trim());
 
@@ -113,12 +113,10 @@ public sealed class SshScreenService : IScreenService
 
         await client.ConnectAsync(cancellationToken);
 
-        // Cytowanie nazwy jako jednego argumentu powloki.
         static string Quote(string value)
             => "'" + value.Replace("'", "'\"'\"'") + "'";
 
-        // Nowa sesja z interaktywna powloka.
-        // Pozostaje uruchomiona po zamknieciu ServerDesk.
+        // Sesja działa w tle po zamknięciu ServerDesk.
         using var command = client.CreateCommand(
             $"screen -dmS {Quote(sessionName)} /bin/bash -i");
 
@@ -133,7 +131,6 @@ public sealed class SshScreenService : IScreenService
 
     public async Task SendCommandAsync(Device device, string privateKeyPath, string passphrase, string expectedHostFingerprint, string sessionId, string text, CancellationToken cancellationToken = default)
     {
-        // Identyfikator sesji musi miec oczekiwany format.
         if (!Regex.IsMatch(sessionId, @"^\d+\.[A-Za-z0-9_.-]+$"))
             throw new AppException(AppErrorCode.InvalidSessionId);
 
@@ -166,14 +163,13 @@ public sealed class SshScreenService : IScreenService
 
         await client.ConnectAsync(cancellationToken);
 
-        // Bezpieczne cytowanie argumentow powloki.
         static string Quote(string value)
             => "'" + value.Replace("'", "'\"'\"'") + "'";
 
         string id = Quote(sessionId);
         string commandText = Quote(text);
 
-        // Wyslanie tekstu, a nastepnie klawisza Enter.
+        // Wysłanie tekstu i zatwierdzenie klawiszem Enter.
         string remoteCommand =
             $"screen -S {id} -p 0 -X stuff {commandText}" +
             $" && screen -S {id} -p 0 -X stuff \"$(printf '\\r')\"";
@@ -205,7 +201,6 @@ public sealed class SshScreenService : IScreenService
             throw new AppException(AppErrorCode.InvalidHostFingerprint);
         }
 
-        // Cytowanie jednego argumentu powloki POSIX.
         static string Quote(string value)
             => "'" + value.Replace("'", "'\"'\"'") + "'";
 
@@ -221,7 +216,6 @@ public sealed class SshScreenService : IScreenService
 
         client.ConnectionInfo.Timeout = TimeSpan.FromSeconds(10);
 
-        // Ustawiamy weryfikacje PRZED nawiazaniem polaczenia.
         client.HostKeyReceived += (_, e) =>
         {
             e.CanTrust = string.Equals(
@@ -234,8 +228,7 @@ public sealed class SshScreenService : IScreenService
 
         string id = Quote(sessionId);
 
-        // Prywatny, losowy katalog zapobiega kolizjom miedzy odczytami.
-        // Trap usuwa plik i katalog przy zakonczeniu skryptu.
+        // Losowy katalog izoluje równoległe odczyty. Pułapka usuwa pliki po zakończeniu skryptu.
         string script = $$"""
         set -eu
         umask 077
@@ -254,8 +247,7 @@ public sealed class SshScreenService : IScreenService
 
         screen -S {{id}} -p 0 -X hardcopy "$tmpdir/output.txt"
 
-        # Zapytanie obslugiwane przez te sama sesje Screen.
-        # Czekamy na jej odpowiedz przed odczytem pliku.
+        # Zapytanie do tej samej sesji pozwala zaczekać na zapis pliku.
         screen -S {{id}} -p 0 -Q info >/dev/null
 
         if [ ! -f "$tmpdir/output.txt" ]; then

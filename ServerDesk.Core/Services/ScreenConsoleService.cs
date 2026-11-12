@@ -59,8 +59,7 @@ public sealed class ScreenConsoleService
             commandText,
             cancellationToken);
 
-        // Od tego miejsca wiemy, ze wysylanie sie powiodlo.
-        // Blad odczytu nie moze byc traktowany jak blad wysylania.
+        // Błąd odświeżenia zachowuje informację o wysłaniu polecenia.
         try
         {
             await Task.Delay(250, cancellationToken);

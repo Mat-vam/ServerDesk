@@ -43,8 +43,6 @@ public sealed class ScreenConnectionService
             throw new AppException(AppErrorCode.HostFingerprintRequired);
         }
 
-        // Otwieranie pliku klucza i sprawdzenie klucza hosta
-        // pozostaja w implementacji SSH.
     }
 
     public void Invalidate()
@@ -91,7 +89,7 @@ public sealed class ScreenConnectionService
             connection.Fingerprint,
             cancellationToken);
 
-        // Zapis nastepuje dopiero po udanej operacji SSH.
+        // Zapis ustawień po udanym połączeniu SSH.
         await _settingsService.SaveAsync(
             _device,
             connection.KeyPath,

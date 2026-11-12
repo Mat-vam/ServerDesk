@@ -141,7 +141,7 @@ public sealed class ScreenConsoleWindow : Window
         {
             if (key == Key.Enter)
             {
-                // Zatrzymujemy dalsza obsluge tego Entera.
+                // Enter zostaje obsłużony przez pole polecenia.
                 key.Handled = true;
 
                 _ = ExecuteOperationAsync(sendCommand: true);
@@ -199,8 +199,6 @@ public sealed class ScreenConsoleWindow : Window
 
         try
         {
-            // Widok wybiera operacje na podstawie akcji uzytkownika.
-            // Jej przebieg i walidacja znajduja sie w serwisie.
             var result = await Task.Run(() =>
                 sendCommand
                     ? _consoleService.SendAndRefreshAsync(
@@ -234,7 +232,6 @@ public sealed class ScreenConsoleWindow : Window
                     return;
                 }
 
-                // Formatowanie tekstu nalezy do prezentacji.
                 string displayOutput = result.Output?.TrimEnd() ?? "";
 
                 _consoleOutput.Text =
